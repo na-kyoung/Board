@@ -1,12 +1,32 @@
 import { useRouter } from 'next/router';
 import classes from './Board.module.css';
 import Link from 'next/link';
+import { useEffect } from 'react';
 
 function Board(props) {
+  console.log('Board Start! ', props);
   const router  = useRouter();
 
   const boardData = props.boardData[0];
-  console.log(boardData);
+  // console.log(boardData);
+
+  useEffect(() => {
+    console.log('Fetching Data...');
+    fetch('http://localhost:5000/testSelect', {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    .then((res) => {
+      return res.json();
+    })
+    .then((res) => {
+      console.log(res);
+    })
+    .catch((err) => {
+      console.log('Fetch Error : ', err);
+    })
+  }, []);
 
 
   function submitHandler(event) {
