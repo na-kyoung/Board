@@ -13,6 +13,10 @@ function ModifyBoard(props) {
   const contentInputRef = useRef();
   const dateInputRef = useRef();
 
+  // 날짜형식 변경
+  // const createdDate = new Date(modifyData.date);
+  // const date = createdDate.toISOString().split("T")[0];
+
   function submitHandler(event) {
     event.preventDefault();
 

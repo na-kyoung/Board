@@ -1,33 +1,55 @@
 import { useRouter } from 'next/router';
 import classes from './Board.module.css';
 import Link from 'next/link';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 function Board(props) {
-  console.log('Board Start! ', props);
-  const router  = useRouter();
+  console.log('Board Start! ');
+  const [boardData, setBoardData] = useState([]); // DB에서 가져온 데이터
 
-  const boardData = props.boardData[0];
+  // 파라미터에서 id 가져오기
+  const router  = useRouter();
+  const boardID = router.query.boardID;
+  console.log(boardID);
+
+  // const boardData = props.boardData[0];
   // console.log(boardData);
 
+  // 데이터 가져오기
   useEffect(() => {
     console.log('Fetching Data...');
-    fetch('http://localhost:5000/testSelect', {
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-    .then((res) => {
-      return res.json();
-    })
-    .then((res) => {
-      console.log(res);
-    })
-    .catch((err) => {
-      console.log('Fetch Error : ', err);
-    })
+
+    async function fetchBoard() {
+      const response = await fetch(`http://localhost:5000/board/${boardID}`);
+      const resData = await response.json();
+      // console.log(resData);
+      const data = dateFormat(resData[0]);
+      setBoardData(data); 
+    }
+
+    fetchBoard();
   }, []);
 
+  // 날짜 포맷 변경
+  function dateFormat(data){
+    console.log(data.created_at);
+
+    const createdDate = new Date(data.created_at);
+    const date = createdDate.toISOString().split("T")[0];
+    // setBoardData((prevData) => ({
+    //   ...prevData,
+    //   created_at: createdDate
+    //   // createdDate.toISOString().split("T")[0]
+    // }));
+
+    data = {
+      ...data,
+      created_at: date
+    }
+    console.log(data.created_at);
+
+    return data;
+  }
 
   function submitHandler(event) {
     event.preventDefault();
@@ -40,8 +62,8 @@ function Board(props) {
           <h2> {boardData.title} </h2>
         </div>
         <div className={classes.control}>
-          <h4 className={classes.controldate}> {boardData.date} </h4>
-          <h4 className={classes.controlwriter}> {boardData.writer} </h4>
+          <h4 className={classes.controldate}> {boardData.created_at} </h4>
+          <h4 className={classes.controlwriter}> {boardData.user_id} </h4>
         </div>
         <div className={classes.control}>
           <textarea id="content" rows="20" value={boardData.content} readOnly />
@@ -51,8 +73,8 @@ function Board(props) {
             <Link href={{
               pathname: `/modifyboard/${boardData.boardID}`,
               query: {title: boardData.title,
-                      writer: boardData.writer,
-                      date: boardData.date,
+                      writer: boardData.user_id,
+                      date: boardData.created_at,
                       content: boardData.content
               },
               }}

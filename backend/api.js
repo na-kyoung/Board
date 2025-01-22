@@ -41,6 +41,16 @@ app.get('/testSelect', async (req, res) => {
     res.send(rows);
 });
 
+app.get('/board/:postid', async (req, res) => {
+    const postID = req.params.postid;
+    const conn = await getConn();
+    const query = 'SELECT * FROM POST where post_id = ?';
+    let [rows, fields] = await conn.query(query, [postID]);
+    conn.release();
+
+    res.send(rows);
+});
+
 // app.get('/places', async (req, res) => {
 //   const fileContent = await fs.readFile('./data/places.json');
 

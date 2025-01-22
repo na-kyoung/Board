@@ -7,23 +7,13 @@ function MainPage(){
 
   return (
     <>
-      <nav>
-        <ul>
-          <li>
-            <Link href='/'>All Board</Link>
-          </li>
-          <li>
-            <Link href='/newboard'>Add New Board</Link>
-          </li>
-        </ul>
-      </nav>
       <h1>The MainPage</h1>
       <ul>
           <li>
-              <Link href="/reactjs">ReactJS Is A Great Framework</Link>
+              <Link href="/1">ReactJS Is A Great Framework</Link>
           </li>
           <li>
-              <Link href="/nextjs">NextJS Is A Great Framework</Link>
+              <Link href="/2">NextJS Is A Great Framework</Link>
           </li>
           <li>
               <Link href={`/${boardID}`}>Testing...</Link>
