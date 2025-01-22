@@ -40,28 +40,37 @@ function Board(props) {
           <h2> {boardData.title} </h2>
         </div>
         <div className={classes.control}>
-          <h4> 작성자 : {boardData.writer} </h4>
+          <h4 className={classes.controldate}> {boardData.date} </h4>
+          <h4 className={classes.controlwriter}> {boardData.writer} </h4>
         </div>
         <div className={classes.control}>
-          <h4> 작성일 : {boardData.date} </h4>
-        </div>
-        <div className={classes.control}>
-          <textarea id="content" rows="10" value={boardData.content} readOnly />
+          <textarea id="content" rows="20" value={boardData.content} readOnly />
         </div>
         <div className={classes.actions}>
-          <Link href={{
-            pathname: `/modifyboard/${boardData.boardID}`,
-            query: {title: boardData.title,
-                    writer: boardData.writer,
-                    date: boardData.date,
-                    content: boardData.content
-            },
-            }}
-            as={`/modifyboard/${boardData.boardID}`}>
-              Modify Board
-          </Link>
+          <button type='button'>
+            <Link href={{
+              pathname: `/modifyboard/${boardData.boardID}`,
+              query: {title: boardData.title,
+                      writer: boardData.writer,
+                      date: boardData.date,
+                      content: boardData.content
+              },
+              }}
+              as={`/modifyboard/${boardData.boardID}`}>
+                Modify
+            </Link>
+          </button>
+          <button>Delete</button>
         </div>
       </form>
+      {/* <div>
+        <textarea></textarea>
+      </div> */}
+      <ul>
+        <li>댓글</li>
+        <li>댇글</li>
+        <li>댓ㄱ들ㅇ</li>
+      </ul>
     </>
   );
 }

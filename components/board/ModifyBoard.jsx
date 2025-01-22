@@ -59,7 +59,7 @@ function ModifyBoard(props) {
           </textarea>
         </div>
         <div className={classes.actions}>
-          <button>Modify Board</button>
+          <button>Modify</button>
         </div>
       </form>
     </>

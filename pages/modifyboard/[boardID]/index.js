@@ -1,6 +1,6 @@
 // our-domain.com/modifyboard/[boardID]
 
-import ModifyBoard from "@/components/ModifyBoard";
+import ModifyBoard from "@/components/board/ModifyBoard";
 import { useRouter } from "next/router";
 
 function ModifyPage(){
@@ -8,8 +8,8 @@ function ModifyPage(){
 
     const boardData = router.query;
     const boardID = router.query.boardID;
-    console.log(boardData);
-    console.log(boardID);
+    // console.log(boardData);
+    // console.log(boardID);
 
     function addBoardHandler(eneteredBoardData){
         console.log(eneteredBoardData);
@@ -17,8 +17,8 @@ function ModifyPage(){
 
     return (
         <>
-            <h2>ModifyPage</h2>
-            <h3>{boardID}</h3>
+            {/* <h2>ModifyPage</h2>
+            <h3>{boardID}</h3> */}
             <ModifyBoard modifyData={boardData} onModifyBoard={addBoardHandler} />
         </>
     )

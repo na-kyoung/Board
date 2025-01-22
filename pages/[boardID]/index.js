@@ -1,6 +1,6 @@
 // our-domain.com/[boardID]
 
-import Board from "@/components/Board";
+import Board from "@/components/board/Board";
 import { useRouter } from "next/router";
 
 const DUMMY_DATA = [
@@ -21,8 +21,8 @@ function DetailPage(){
 
     return (
         <>
-            <h2>DetailPage</h2>
-            <h3>{boardID}</h3>
+            {/* <h2>DetailPage</h2>
+            <h3>{boardID}</h3> */}
             <Board boardData={DUMMY_DATA}/>
         </>
     )

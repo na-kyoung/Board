@@ -1,6 +1,6 @@
 // our-domain.com/newboard
 
-import NewBoard from "@/components/NewBoard";
+import NewBoard from "@/components/board/NewBoard";
 
 function NewBoardPage(){
     function addBoardHandler(eneteredBoardData){

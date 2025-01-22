@@ -51,7 +51,7 @@ function NewBoard(props) {
           ></textarea>
         </div>
         <div className={classes.actions}>
-          <button>Add Board</button>
+          <button>Write</button>
         </div>
       </form>
     </>
