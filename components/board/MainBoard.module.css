@@ -1,0 +1,39 @@
+.list li {
+  list-style-type: none;
+}
+
+/* body {
+  padding:1.5em;
+  background: #f5f5f5
+} */
+
+.table {
+  font-size: .9em;
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.thead th,
+.tbody th {
+  text-align: left;
+}
+  
+.table thead {
+  font-weight: bold;
+  color: #fff;
+  background: #707070;
+}
+  
+.thead td,
+.tbody td,
+.thead th,
+.tbody th {
+  padding: 1em .5em;
+  vertical-align: middle;
+}
+  
+.thead td,
+.tbody td {
+  border-bottom: 1px solid rgba(0,0,0,.1);
+  background: #fff;
+}

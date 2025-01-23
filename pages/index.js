@@ -1,26 +1,23 @@
 // our-domain.com/
 
-import Link from "next/link";
+import MainBoard from "@/components/board/MainBoard";
 
-function MainPage(){
-  const boardID = 'test';
+function MainPage(props){
 
   return (
-    <>
-      <h1>The MainPage</h1>
-      <ul>
-          <li>
-              <Link href="/1">ReactJS Is A Great Framework</Link>
-          </li>
-          <li>
-              <Link href="/2">NextJS Is A Great Framework</Link>
-          </li>
-          <li>
-              <Link href={`/${boardID}`}>Testing...</Link>
-          </li>
-      </ul>
-    </>
+      <MainBoard boards={props.boards} />
   );
+}
+
+export async function getServerSideProps(context){
+  const res = await fetch(`http://localhost:5000/board`);
+  const data = await res.json();
+
+  return {
+    props: {
+      boards: data
+    }
+  };
 }
 
 export default MainPage;

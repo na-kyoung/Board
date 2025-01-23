@@ -21,8 +21,6 @@ function DetailPage(){
 
     return (
         <>
-            {/* <h2>DetailPage</h2>
-            <h3>{boardID}</h3> */}
             <Board boardData={DUMMY_DATA} />
         </>
     )

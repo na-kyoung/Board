@@ -17,8 +17,6 @@ function ModifyPage(){
 
     return (
         <>
-            {/* <h2>ModifyPage</h2>
-            <h3>{boardID}</h3> */}
             <ModifyBoard modifyData={boardData} onModifyBoard={addBoardHandler} />
         </>
     )

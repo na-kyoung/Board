@@ -46,15 +46,15 @@ function ModifyBoard(props) {
           <label htmlFor='writer'>Writer</label>
           <input type='text' id='writer' ref={writerInputRef} defaultValue={modifyData.writer} required />
         </div>
-        <div className={classes.control}>
+        {/* <div className={classes.control}>
           <label htmlFor='date'>Date</label>
-          <input type='date' id='date' ref={dateInputRef} defaultValue={modifyData.date} required />
-        </div>
+          <input type='date' id='date' ref={dateInputRef} defaultValue={modifyData.date} readOnly />
+        </div> */}
         <div className={classes.control}>
           <label htmlFor='content'>Content</label>
           <textarea
             id='content'
-            rows='10'
+            rows='20'
             ref={contentInputRef}
             value={content}
             onChange={(event) => setContent(event.target.value)}

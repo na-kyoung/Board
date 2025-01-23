@@ -41,6 +41,20 @@ app.get('/testSelect', async (req, res) => {
     res.send(rows);
 });
 
+// 게시판 전체 조회
+app.get('/board', async (req, res) => {
+    // const postID = req.params.postid;
+    const conn = await getConn();
+    const query = `SELECT row_number() over (order by post_id) as no, post_id, user_id, title,
+        CONCAT(LEFT(content, 15), '...') AS content, created_at FROM post ORDER BY post_id`;
+    let [rows, fields] = await conn.query(query, []);
+    conn.release();
+    console.log(rows);
+
+    res.send(rows);
+});
+
+// 게시글 조회
 app.get('/board/:postid', async (req, res) => {
     const postID = req.params.postid;
     const conn = await getConn();

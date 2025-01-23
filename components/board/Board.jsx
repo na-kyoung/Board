@@ -85,14 +85,6 @@ function Board(props) {
           <button>Delete</button>
         </div>
       </form>
-      {/* <div>
-        <textarea></textarea>
-      </div> */}
-      <ul>
-        <li>댓글</li>
-        <li>댇글</li>
-        <li>댓ㄱ들ㅇ</li>
-      </ul>
     </>
   );
 }
