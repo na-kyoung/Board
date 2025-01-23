@@ -2,6 +2,7 @@ import { useRouter } from 'next/router';
 import classes from './Board.module.css';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import Comment from './Comment';
 
 function Board(props) {
   console.log('Board Start! ');
@@ -12,9 +13,6 @@ function Board(props) {
   const boardID = router.query.boardID;
   console.log(boardID);
 
-  // const boardData = props.boardData[0];
-  // console.log(boardData);
-
   // 데이터 가져오기
   useEffect(() => {
     console.log('Fetching Data...');
@@ -23,8 +21,8 @@ function Board(props) {
       const response = await fetch(`http://localhost:5000/board/${boardID}`);
       const resData = await response.json();
       // console.log(resData);
-      const data = dateFormat(resData[0]);
-      setBoardData(data); 
+      const data = await dateFormat(resData[0]);
+      setBoardData(data);
     }
 
     fetchBoard();
@@ -32,21 +30,15 @@ function Board(props) {
 
   // 날짜 포맷 변경
   function dateFormat(data){
-    console.log(data.created_at);
-
+    // console.log(data.created_at);
     const createdDate = new Date(data.created_at);
     const date = createdDate.toISOString().split("T")[0];
-    // setBoardData((prevData) => ({
-    //   ...prevData,
-    //   created_at: createdDate
-    //   // createdDate.toISOString().split("T")[0]
-    // }));
 
     data = {
       ...data,
       created_at: date
     }
-    console.log(data.created_at);
+    // console.log(data.created_at);
 
     return data;
   }
@@ -66,25 +58,27 @@ function Board(props) {
           <h4 className={classes.controlwriter}> {boardData.user_id} </h4>
         </div>
         <div className={classes.control}>
-          <textarea id="content" rows="20" value={boardData.content} readOnly />
+          <textarea id="content" rows="15" value={boardData.content} readOnly />
         </div>
         <div className={classes.actions}>
           <button type='button'>
             <Link href={{
-              pathname: `/modifyboard/${boardData.boardID}`,
-              query: {title: boardData.title,
-                      writer: boardData.user_id,
-                      date: boardData.created_at,
-                      content: boardData.content
+              pathname: `/modifyboard/${boardID}`,
+              query: {
+                title: boardData.title,
+                writer: boardData.user_id,
+                date: boardData.created_at,
+                content: boardData.content
               },
               }}
-              as={`/modifyboard/${boardData.boardID}`}>
+              as={`/modifyboard/${boardID}`}>
                 Modify
             </Link>
           </button>
           <button>Delete</button>
         </div>
       </form>
+      <Comment postID={boardID} />
     </>
   );
 }

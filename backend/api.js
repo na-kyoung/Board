@@ -65,6 +65,23 @@ app.get('/board/:postid', async (req, res) => {
     res.send(rows);
 });
 
+// 게시글 댓글 조회
+app.get('/comment/:postid', async (req, res) => {
+    const postID = req.params.postid;
+    const conn = await getConn();
+    const query = 'SELECT * FROM Comment'
+                + ' WHERE parent_id IS NULL AND post_id = ?'
+                + ' UNION ALL'
+                + ' SELECT * FROM Comment'
+                + ' WHERE parent_id IS NOT NULL AND post_id = ?'
+                + ' ORDER BY COALESCE(parent_id, comment_id), created_at';
+    let [rows, fields] = await conn.query(query, [postID, postID]);
+    conn.release();
+    console.log(rows);
+
+    res.send(rows);
+});
+
 // app.get('/places', async (req, res) => {
 //   const fileContent = await fs.readFile('./data/places.json');
 

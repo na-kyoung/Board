@@ -23,13 +23,13 @@ function ModifyBoard(props) {
     const enteredTitle = titleInputRef.current.value;
     const enteredWriter = writerInputRef.current.value;
     const enteredContent = contentInputRef.current.value;
-    const enteredDate = dateInputRef.current.value;
+    // const enteredDate = dateInputRef.current.value;
 
     const boardData = {
       title: enteredTitle,
       writer: enteredWriter,
       content: enteredContent,
-      date: enteredDate,
+      // date: enteredDate,
     };
 
     props.onModifyBoard(boardData);
@@ -54,7 +54,7 @@ function ModifyBoard(props) {
           <label htmlFor='content'>Content</label>
           <textarea
             id='content'
-            rows='20'
+            rows='15'
             ref={contentInputRef}
             value={content}
             onChange={(event) => setContent(event.target.value)}
