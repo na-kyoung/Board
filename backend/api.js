@@ -118,7 +118,7 @@ app.post('/createboard', async (req, res) => {
     } catch(err) {
         console.log(`Create Board Error : ${err}`);
         conn.release();
-        return res.status(500).json({ success: false, message: 'Failed to create post' });
+        return res.status(500).json({ success: false, message: 'Failed to Create post' });
     }
 });
 
@@ -156,7 +156,7 @@ app.delete('/deleteboard/:postid', async (req, res) => {
     // });
 });
 
-// 게시글 댓글 조회
+// 댓글 조회
 app.get('/comment/:postid', async (req, res) => {
     const postID = req.params.postid;
     const conn = await getConn();
@@ -171,6 +171,25 @@ app.get('/comment/:postid', async (req, res) => {
     // console.log(rows);
 
     res.send(rows);
+});
+
+// 댓글 생성
+app.post('/createcomment', async (req, res) => {
+    const { post_id, user_id, parent_id, content, depth } = req.body;
+    const conn = await getConn();
+
+    const query = 'INSERT INTO comment VALUES (null, ?, ?, ?, ?, ?, now())';
+
+    try{
+        await conn.query(query, [post_id, user_id, parent_id, content, depth]);
+        console.log('Create Comment Success!');
+        conn.release();
+        return res.status(200).json({ success: true, message: 'Create Comment Success!'});
+    } catch(err) {
+        console.log(`Create Comment Error : ${err}`);
+        conn.release();
+        return res.status(500).json({ success: false, message: 'Failed to Create comment' });
+    }
 });
 
 

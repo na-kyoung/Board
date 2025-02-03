@@ -2,7 +2,7 @@ import { useRouter } from 'next/router';
 import classes from './Board.module.css';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import Comment from '../comment/Comment';
+import Comment from '../comment/MainComment';
 import FileUpload from '../FileUpload';
 
 function Board(props) {
@@ -100,7 +100,7 @@ function Board(props) {
                 Modify
             </Link>
           </button>
-          <button onClick={() => handleDelete(user.id)}>Delete</button>
+          <button onClick={() => handleDelete()}>Delete</button>
         </div>
       </form>
       {/* <FileUpload postID={boardID} /> */}

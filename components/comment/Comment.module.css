@@ -1,4 +1,4 @@
-.commentBox div {
+/* .commentBox div {
   padding: 1rem;
 }
 
@@ -7,7 +7,7 @@
   margin: auto;
   border-color: #e5e5e5;
   border-width: 1px 0 0 0;
-}
+} */
 
 .user {
   font-size: 11pt;
@@ -41,8 +41,8 @@
   padding-left: 0.5rem;
 }
 
-.newcomment p{
+/* .newcomment p{
   margin-top: 0.7rem;
   font-size: 12pt;
   font-weight: bold;
-}
+} */

@@ -3,7 +3,7 @@ import classes from './NewComment.module.css';
 
 function NewComment(props){
     const depth = props.depth;
-    console.log(props);
+    // console.log(props);
 
     const userInputRef = useRef();
     const commentInputRef = useRef();
