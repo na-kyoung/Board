@@ -13,7 +13,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // CORS
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*'); // allow all domains
-  res.setHeader('Access-Control-Allow-Methods', 'GET, PUT');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, PUT, DELETE');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   next();
 });
@@ -44,11 +44,13 @@ app.get('/testSelect', async (req, res) => {
 app.get('/board', async (req, res) => {
     // const postID = req.params.postid;
     const conn = await getConn();
-    const query = `SELECT row_number() over (order by post_id) as no, post_id, user_id, title,
-        CONCAT(LEFT(content, 15), '...') AS content, created_at FROM post ORDER BY post_id`;
+    const query = 'SELECT row_number() over (order by post_id) as no,'
+                + ' post_id, user_id, title,'
+                + ` CONCAT(LEFT(content, 13), '...') AS content, created_at`
+                + ' FROM post ORDER BY post_id';
     let [rows, fields] = await conn.query(query, []);
     conn.release();
-    console.log(rows);
+    // console.log(rows);
 
     res.send(rows);
 });
@@ -71,22 +73,12 @@ app.get('/board/:postid', async (req, res) => {
 //     const conn = await getConn();
 
 //     const query = 'UPDATE post SET title = ?, user_id = ?, content = ? WHERE post_id = ?';
-//     // const values = [title, user_id, content];
-
-//     // let [rows, fields] = await conn.query(query, [title, user_id, content, postID]);
-//     // conn.release();
-//     // res.send(rows);
 
 //     await conn.query(query, [title, user_id, content, postID], (err, results) => {
 //         if (err) {
 //             console.log(`query Error : ${err}`);
 //             return res.status(500).json({ success: false, message: 'Failed to update post' });
 //         }
-//         // if (res.affectedRows === 0) {
-//         //     // 만약 수정된 데이터가 없다면
-//         //     return res.status(404).json({ success: false, message: 'Post not found or no changes made' });
-//         // }
-//         // 성공적으로 수정되었다면
 //         console.log("sadfasdf");
 //         return res.status(200).json({ success: true, message: 'Post updated successfully', data: results });
 //     });
@@ -101,14 +93,67 @@ app.put('/modifyboard/:postid', async (req, res) => {
 
     try{
         await conn.query(query, [title, user_id, content, postID])
-        console.log('Update Success!');
+        console.log('Update Board Success!');
         conn.release();
         return res.status(200).json({ success: true, message: 'Post updated successfully'});
     } catch(err) {
-        console.log(`Update Error : ${err}`);
+        console.log(`Update Board Error : ${err}`);
         conn.release();
         return res.status(500).json({ success: false, message: 'Failed to update post' });
     }
+});
+
+// 게시글 생성
+app.post('/createboard', async (req, res) => {
+    const { title, user_id, content } = req.body;
+    const conn = await getConn();
+
+    const query = 'INSERT INTO post VALUES (null, ?, ?, ?, now())';
+
+    try{
+        await conn.query(query, [user_id, title, content]);
+        console.log('Create Board Success!');
+        conn.release();
+        return res.status(200).json({ success: true, message: 'Create Board Success!'});
+    } catch(err) {
+        console.log(`Create Board Error : ${err}`);
+        conn.release();
+        return res.status(500).json({ success: false, message: 'Failed to create post' });
+    }
+});
+
+// 게시글 삭제
+app.delete('/deleteboard/:postid', async (req, res) => {
+    const postID = req.params.postid;
+    const conn = await getConn();
+
+    const query = 'DELETE FROM post WHERE post_id = ?';
+
+    try{
+        await conn.query(query, [postID]);
+        console.log('Delete Board Success!');
+        conn.release();
+        return res.status(200).json({ success: true, message: 'Delete Board Success!'});
+    } catch(err) {
+        console.log(`Delete Board Error : ${err}`);
+        conn.release();
+        return res.status(500).json({ success: false, message: 'Failed to Delete post' });
+    }
+
+    // db.query(query, [id], (err, results) => {
+    //   if (err) {
+    //     console.error('MySQL 삭제 오류:', err);
+    //     return res.status(500).json({ error: 'Database deletion failed' });
+    //   }
+  
+    //   if (results.affectedRows === 0) {
+    //     return res.status(404).json({ message: 'User not found' });
+    //   }
+  
+    //   return res.status(200).json({
+    //     message: `User with ID ${id} deleted successfully`,
+    //   });
+    // });
 });
 
 // 게시글 댓글 조회
@@ -123,7 +168,7 @@ app.get('/comment/:postid', async (req, res) => {
                 + ' ORDER BY COALESCE(parent_id, comment_id), created_at';
     let [rows, fields] = await conn.query(query, [postID, postID]);
     conn.release();
-    console.log(rows);
+    // console.log(rows);
 
     res.send(rows);
 });

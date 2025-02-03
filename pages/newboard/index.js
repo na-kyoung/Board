@@ -3,11 +3,7 @@
 import NewBoard from "@/components/board/NewBoard";
 
 function NewBoardPage(){
-    function addBoardHandler(eneteredBoardData){
-        console.log(eneteredBoardData);
-    }
-
-    return <NewBoard onAddBoard={addBoardHandler} />
+    return <NewBoard />
 }
 
 export default NewBoardPage;

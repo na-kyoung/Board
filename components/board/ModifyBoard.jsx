@@ -20,12 +20,9 @@ function ModifyBoard(props) {
 
   function submitHandler(event) {
     event.preventDefault();
-
-    // modifyBoard(title, user_id, content);
     modifyBoard();
   }
 
-  // function modifyBoard(title, user_id, content){
   const modifyBoard = async () => {
     const title = titleInputRef.current.value;
     const user_id = writerInputRef.current.value;

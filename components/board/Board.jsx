@@ -48,6 +48,30 @@ function Board(props) {
     event.preventDefault();
   }
 
+  // 글 삭제
+  const handleDelete = async () => {
+    const isConfirmed = window.confirm('헤당 글을 삭제하시겠습니까?');
+    if (!isConfirmed) return;
+
+    try {
+      const response = await fetch(`http://localhost:5000/deleteboard/${boardID}`, {
+        method: 'DELETE',
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        alert('글 삭제 완료!');
+        router.push(`/`);
+      } else {
+        alert(`글 삭제 실패 : ${result.message}`);
+      }
+    } catch (error) {
+      console.error('글 삭제 오류:', error);
+      alert('삭제 중 오류가 발생했습니다.');
+    }
+  };
+
   return (
     <>
       <form className={classes.form} onSubmit={submitHandler}>
@@ -76,7 +100,7 @@ function Board(props) {
                 Modify
             </Link>
           </button>
-          <button>Delete</button>
+          <button onClick={() => handleDelete(user.id)}>Delete</button>
         </div>
       </form>
       {/* <FileUpload postID={boardID} /> */}
