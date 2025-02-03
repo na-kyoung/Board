@@ -11,13 +11,9 @@ function ModifyPage(){
     // console.log(boardData);
     // console.log(boardID);
 
-    function addBoardHandler(eneteredBoardData){
-        console.log(eneteredBoardData);
-    }
-
     return (
         <>
-            <ModifyBoard modifyData={boardData} onModifyBoard={addBoardHandler} />
+            <ModifyBoard modifyData={boardData} />
         </>
     )
 }

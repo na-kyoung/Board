@@ -6,7 +6,7 @@ function NewBoard(props) {
   const titleInputRef = useRef();
   const writerInputRef = useRef();
   const contentInputRef = useRef();
-  const dateInputRef = useRef();
+  // const dateInputRef = useRef();
 
   function submitHandler(event) {
     event.preventDefault();

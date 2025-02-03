@@ -1,39 +1,72 @@
-import { useRef, useState } from 'react';
+"use client"; // CSR
 
+import { useRef, useState } from 'react';
+import { useRouter } from 'next/router';
 import classes from './ModifyBoard.module.css';
 
 function ModifyBoard(props) {
   const modifyData = props.modifyData;
-  console.log(modifyData);
+  // console.log(modifyData);
 
   const [content, setContent] = useState(modifyData.content);
 
   const titleInputRef = useRef();
   const writerInputRef = useRef();
   const contentInputRef = useRef();
-  const dateInputRef = useRef();
 
-  // 날짜형식 변경
-  // const createdDate = new Date(modifyData.date);
-  // const date = createdDate.toISOString().split("T")[0];
+  const router  = useRouter();
+  const boardID = router.query.boardID;
+  // console.log(boardID);
 
   function submitHandler(event) {
     event.preventDefault();
 
-    const enteredTitle = titleInputRef.current.value;
-    const enteredWriter = writerInputRef.current.value;
-    const enteredContent = contentInputRef.current.value;
-    // const enteredDate = dateInputRef.current.value;
-
-    const boardData = {
-      title: enteredTitle,
-      writer: enteredWriter,
-      content: enteredContent,
-      // date: enteredDate,
-    };
-
-    props.onModifyBoard(boardData);
+    // modifyBoard(title, user_id, content);
+    modifyBoard();
   }
+
+  // function modifyBoard(title, user_id, content){
+  const modifyBoard = async () => {
+    const title = titleInputRef.current.value;
+    const user_id = writerInputRef.current.value;
+    const content = contentInputRef.current.value;
+
+    console.log('글 수정 중 ...');
+    try {
+      const response = await fetch(`http://localhost:5000/modifyboard/${boardID}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ title, user_id, content }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        console.log('글 수정 완료!');
+        router.push(`/${boardID}`);
+        // router.push(window.location.origin + `/${boardID}`);  // 절대 경로
+      } else {
+        console.log('글 수정 실패 : ' + result.message);
+      }
+    } catch (error) {
+      console.error('Error updating data :', error);
+    }
+
+    // fetch(`http://localhost:5000/modifyboard/${boardID}`, {
+    //   method: 'PUT',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //   },
+    //   body: JSON.stringify({ title, user_id, content }),
+    // })
+    // .then((res) => res.json())
+    // .then((result) => {
+    //   console.log(result);
+    //   router.push(`/${boardID}`);
+    // });
+  };
 
   return (
     <>

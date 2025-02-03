@@ -2,7 +2,8 @@ import { useRouter } from 'next/router';
 import classes from './Board.module.css';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import Comment from './Comment';
+import Comment from '../comment/Comment';
+import FileUpload from '../FileUpload';
 
 function Board(props) {
   console.log('Board Start! ');
@@ -78,6 +79,7 @@ function Board(props) {
           <button>Delete</button>
         </div>
       </form>
+      {/* <FileUpload postID={boardID} /> */}
       <Comment postID={boardID} />
     </>
   );

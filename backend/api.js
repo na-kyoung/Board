@@ -1,15 +1,14 @@
-// import fs from 'node:fs/promises';
-
 const express = require('express');
 const bodyParser = require("body-parser");
-// import bodyParser from 'body-parser';
-// import express from 'express';
 const mysql = require('mysql2/promise');
+const multer = require('multer');
+const path = require('path');
 
 const app = express();
 
-app.use(express.static('images')); // 이미지 파일 제공
+// app.use(express.static('images')); // 이미지 파일 제공
 app.use(bodyParser.json());
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // CORS
 app.use((req, res, next) => {
@@ -65,6 +64,53 @@ app.get('/board/:postid', async (req, res) => {
     res.send(rows);
 });
 
+// 게시글 수정
+// app.put('/modifyboard/:postid', async (req, res) => {
+//     const postID = req.params.postid;
+//     const { title, user_id, content } = req.body;
+//     const conn = await getConn();
+
+//     const query = 'UPDATE post SET title = ?, user_id = ?, content = ? WHERE post_id = ?';
+//     // const values = [title, user_id, content];
+
+//     // let [rows, fields] = await conn.query(query, [title, user_id, content, postID]);
+//     // conn.release();
+//     // res.send(rows);
+
+//     await conn.query(query, [title, user_id, content, postID], (err, results) => {
+//         if (err) {
+//             console.log(`query Error : ${err}`);
+//             return res.status(500).json({ success: false, message: 'Failed to update post' });
+//         }
+//         // if (res.affectedRows === 0) {
+//         //     // 만약 수정된 데이터가 없다면
+//         //     return res.status(404).json({ success: false, message: 'Post not found or no changes made' });
+//         // }
+//         // 성공적으로 수정되었다면
+//         console.log("sadfasdf");
+//         return res.status(200).json({ success: true, message: 'Post updated successfully', data: results });
+//     });
+//     conn.release();
+// });
+app.put('/modifyboard/:postid', async (req, res) => {
+    const postID = req.params.postid;
+    const { title, user_id, content } = req.body;
+    const conn = await getConn();
+
+    const query = 'UPDATE post SET title = ?, user_id = ?, content = ? WHERE post_id = ?';
+
+    try{
+        await conn.query(query, [title, user_id, content, postID])
+        console.log('Update Success!');
+        conn.release();
+        return res.status(200).json({ success: true, message: 'Post updated successfully'});
+    } catch(err) {
+        console.log(`Update Error : ${err}`);
+        conn.release();
+        return res.status(500).json({ success: false, message: 'Failed to update post' });
+    }
+});
+
 // 게시글 댓글 조회
 app.get('/comment/:postid', async (req, res) => {
     const postID = req.params.postid;
@@ -81,6 +127,47 @@ app.get('/comment/:postid', async (req, res) => {
 
     res.send(rows);
 });
+
+
+// // 파일 저장 설정 (저장경로, 파일명)
+// const storage = multer.diskStorage({
+//     destination: (req, file, cb) => {
+//         cb(null, './uploads/');
+//     },
+//     filename: (req, file, cb) => {
+//         cb(null, `${Date.now()}-${file.originalname}`);
+//     }
+// });
+// const upload = multer({ storage });
+
+// // 파일 업로드 엔드포인트
+// app.post('/upload', upload.single('file'), (req, res) => {
+//     const file = req.file;
+//     if (!file) {
+//         return res.status(400).send('No file uploaded.');
+//     }
+
+//     const { filename, mimetype, size } = file;
+//     const filePath = `uploads/${filename}`;
+
+//     // MySQL에 저장
+//     const sql = 'INSERT INTO files (name, path, type, size) VALUES (?, ?, ?, ?)';
+//     db.query(sql, [filename, filePath, mimetype, size], (err, result) => {
+//         if (err) throw err;
+//         res.json({ id: result.insertId, filename, filePath });
+//     });
+// });
+
+// // 파일 목록 조회 API
+// app.get('/files', (req, res) => {
+//     const sql = 'SELECT id, name, path, type, size FROM files';
+//     db.query(sql, (err, results) => {
+//         if (err) {
+//             return res.status(500).send('Error fetching files');
+//         }
+//         res.json(results);
+//     });
+// });
 
 // app.get('/places', async (req, res) => {
 //   const fileContent = await fs.readFile('./data/places.json');

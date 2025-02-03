@@ -10,16 +10,29 @@
 }
 
 .user {
-  font-size: 11pt;
-  font-weight: 300;
+  /* font-size: 11pt;
+  font-weight: 300; */
+  width: 100px;
+}
+
+.content {
+  width: 530px;
+}
+
+.comment {
+  font-size: 10pt;
+  font-weight: 100;
+  
 }
 
 .comment input {
-  width: 100%;
-  outline: none;
-  border: none;
+  /* width: 100%; */
+  /* outline: none; */
+  /* border: none; */
   font-size: 10pt;
   font-weight: 100;
+  margin-top: 0.8rem;
+  /* padding: 0rem; */
 }
 
 .date {
@@ -39,4 +52,6 @@
   border: none;
   background-color: #fff;
   padding-left: 0.5rem;
+  margin-top: 0.3rem;
+  margin-bottom: 0.3rem;
 }

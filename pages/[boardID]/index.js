@@ -3,15 +3,15 @@
 import Board from "@/components/board/Board";
 import { useRouter } from "next/router";
 
-const DUMMY_DATA = [
-    {
-        // boardID: 'm1',
-        title: 'A First Board',
-        writer: 'dddd',
-        date: '2024-12-24',
-        content: 'This is a first Board!'
-    }
-];
+// const DUMMY_DATA = [
+//     {
+//         // boardID: 'm1',
+//         title: 'A First Board',
+//         writer: 'dddd',
+//         date: '2024-12-24',
+//         content: 'This is a first Board!'
+//     }
+// ];
 
 function DetailPage(){
     const router = useRouter(); // 동적 라우팅
@@ -21,7 +21,7 @@ function DetailPage(){
 
     return (
         <>
-            <Board boardData={DUMMY_DATA} />
+            <Board />
         </>
     )
 }

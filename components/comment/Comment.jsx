@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import classes from './Comment.module.css';
 import { format } from "date-fns";
+import NewComment from "./NewComment";
 
 function Comment(props){
     console.log('Comment Start', props.postID);
 
     const [commentData, setCommentData] = useState([]); // DB에서 가져온 데이터
+    const [replyBtn, setReplyBtn] = useState(Array(commentData.length).fill(false));
     // const [newComment, setNewComment] = useState(false);
     const boardID = props.postID;
 
@@ -64,12 +66,10 @@ function Comment(props){
                         </div>
                 )})}
             </div>
-
-            {/* <div>
+            <div className={classes.newcomment}>
                 <p>New Comment</p>
-                <input />
-                <button>작성</button>
-            </div> */}
+                <NewComment depth={0} boardID={boardID} />
+            </div>
         </>
     );
 }
