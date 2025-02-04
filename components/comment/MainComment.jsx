@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import classes from './MainComment.module.css';
 import { format } from "date-fns";
-import NewComment from "./ReplyComment";
 import Comment from "./Comment";
 import { useRouter } from "next/router";
 
@@ -10,6 +9,7 @@ function MainComment(props){
     const [commentData, setCommentData] = useState([]); // DB에서 가져온 데이터
     // const [replyBtn, setReplyBtn] = useState(Array(commentData.length).fill(false));
     const [newComment, setNewComment] = useState(false); // 새로운 댓글 작성시 댓글 조회 트리거
+    const [changeComment, setChangeComment] = useState(false); // 댓글 변화 시(수정, 삭제, 답글 작성) 조회 트리거
     const boardID = props.postID;
 
     const userInputRef = useRef();
@@ -28,7 +28,7 @@ function MainComment(props){
         }
 
         fetchComment();
-    }, [newComment]);
+    }, [newComment, changeComment]);
 
     // 날짜 포맷 변경
     function dateFormat(data){
@@ -79,9 +79,8 @@ function MainComment(props){
     };
 
     // 대댓글 생성시 
-    function handleNewReply(){
-        setNewComment((newComment) => !newComment);
-        console.log('handleNewReply');
+    function handleChangeComment(){
+        setChangeComment((changeComment) => !changeComment);
     }
   
     return (
@@ -90,7 +89,9 @@ function MainComment(props){
             <div className={classes.commentBox}>
                 {commentData.map((comment) => {
                     return (
-                        <Comment key={comment.comment_id} comment={comment} onNewReply={handleNewReply} />
+                        <Comment key={comment.comment_id}
+                                comment={comment}
+                                onChangeComment={handleChangeComment} />
                         // <div className={classes.comment} key={comment.comment_id} style={{ paddingLeft: `${0.5 + (comment.depth || 0) * 3}rem` }}>
                         //     <p className={classes.user}>{comment.user_id}</p>
                         //     <input className={classes.content} value={comment.content} readOnly />

@@ -202,6 +202,24 @@ app.post('/createcomment', async (req, res) => {
     }
 });
 
+// 댓글 삭제
+app.delete('/deletecomment/:commentid', async (req, res) => {
+    const commentID = req.params.commentid;
+    const conn = await getConn();
+
+    const query = 'DELETE FROM comment WHERE comment_id = ?';
+
+    try{
+        await conn.query(query, [commentID]);
+        console.log('Delete Comment Success!');
+        conn.release();
+        return res.status(200).json({ success: true, message: 'Delete Comment Success!'});
+    } catch(err) {
+        console.log(`Delete Comment Error : ${err}`);
+        conn.release();
+        return res.status(500).json({ success: false, message: 'Failed to Delete comment' });
+    }
+});
 
 // // 파일 저장 설정 (저장경로, 파일명)
 // const storage = multer.diskStorage({

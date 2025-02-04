@@ -48,7 +48,6 @@ function ReplyComment({ onNewReply, ...props }){
 
         if (result.success) {
             console.log('대댓글 생성 완료!');
-            // setNewComment((newComment) => !newComment);
             onNewReply(); // 상태끌어올리기
         } else {
             console.log('대댓글 생성 실패 : ' + result.message);
