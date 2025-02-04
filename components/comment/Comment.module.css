@@ -9,9 +9,13 @@
   border-width: 1px 0 0 0;
 } */
 
+.comment {
+  margin-top: -30px;
+}
+
 .user {
-  font-size: 11pt;
-  font-weight: 300;
+  font-size: 10pt;
+  font-weight: bold;
 }
 
 .comment input {
@@ -45,4 +49,10 @@
   margin-top: 0.7rem;
   font-size: 12pt;
   font-weight: bold;
+} */
+
+/* .reply input{
+  padding: 10px;
+  outline: 1px;
+  border: 1px;
 } */

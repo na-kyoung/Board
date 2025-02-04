@@ -1,3 +1,5 @@
+"use client"; // CSR
+
 import { useRouter } from 'next/router';
 import classes from './Board.module.css';
 import Link from 'next/link';
@@ -16,7 +18,7 @@ function Board(props) {
 
   // 데이터 가져오기
   useEffect(() => {
-    console.log('Fetching Data...');
+    console.log('Fetching Board Data...');
 
     async function fetchBoard() {
       const response = await fetch(`http://localhost:5000/board/${boardID}`);

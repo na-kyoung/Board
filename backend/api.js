@@ -160,13 +160,23 @@ app.delete('/deleteboard/:postid', async (req, res) => {
 app.get('/comment/:postid', async (req, res) => {
     const postID = req.params.postid;
     const conn = await getConn();
-    const query = 'SELECT * FROM Comment'
-                + ' WHERE parent_id IS NULL AND post_id = ?'
+    // const query = 'SELECT * FROM Comment'
+    //             + ' WHERE parent_id IS NULL AND post_id = ?'
+    //             + ' UNION ALL'
+    //             + ' SELECT * FROM Comment'
+    //             + ' WHERE parent_id IS NOT NULL AND post_id = ?'
+    //             + ' ORDER BY COALESCE(parent_id, comment_id), created_at';
+    const query = 'WITH RECURSIVE CommentTree AS ('
+                + ` SELECT a.*, CAST(LPAD(comment_id, 10, '0') AS CHAR(255)) AS path`
+                + ' FROM Comment a'
+                + ' WHERE post_id = ? AND parent_id IS NULL'
                 + ' UNION ALL'
-                + ' SELECT * FROM Comment'
-                + ' WHERE parent_id IS NOT NULL AND post_id = ?'
-                + ' ORDER BY COALESCE(parent_id, comment_id), created_at';
-    let [rows, fields] = await conn.query(query, [postID, postID]);
+                + ` SELECT c.*, CONCAT(t.path, ',', LPAD(c.comment_id, 10, '0'))`
+                + ' FROM Comment c'
+                + ' INNER JOIN CommentTree t ON c.parent_id = t.comment_id)'
+                + ' SELECT * FROM CommentTree'
+                + ' ORDER BY LEFT(path, 10), path, created_at';
+    let [rows, fields] = await conn.query(query, [postID]);
     conn.release();
     // console.log(rows);
 

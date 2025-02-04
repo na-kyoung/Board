@@ -1,16 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import classes from './MainComment.module.css';
 import { format } from "date-fns";
-import NewComment from "./NewComment";
+import NewComment from "./ReplyComment";
 import Comment from "./Comment";
 import { useRouter } from "next/router";
 
 function MainComment(props){
     // console.log('MainComment Start', props.postID);
-
     const [commentData, setCommentData] = useState([]); // DB에서 가져온 데이터
     // const [replyBtn, setReplyBtn] = useState(Array(commentData.length).fill(false));
-    const [newComment, setNewComment] = useState(false);
+    const [newComment, setNewComment] = useState(false); // 새로운 댓글 작성시 댓글 조회 트리거
     const boardID = props.postID;
 
     const userInputRef = useRef();
@@ -26,7 +25,6 @@ function MainComment(props){
         const resData = await response.json();
         const data = await dateFormat(resData);
         setCommentData(data);
-        setNewComment(false);
         }
 
         fetchComment();
@@ -71,7 +69,7 @@ function MainComment(props){
 
         if (result.success) {
             console.log('댓글 생성 완료!');
-            setNewComment(true);
+            setNewComment((newComment) => !newComment);
         } else {
             console.log('댓글 생성 실패 : ' + result.message);
         }
@@ -79,14 +77,20 @@ function MainComment(props){
         console.error('Error creating data :', error);
         }
     };
+
+    // 대댓글 생성시 
+    function handleNewReply(){
+        setNewComment((newComment) => !newComment);
+        console.log('handleNewReply');
+    }
   
     return (
         <>
-            <hr />
+            <hr className={classes.hr} />
             <div className={classes.commentBox}>
                 {commentData.map((comment) => {
                     return (
-                        <Comment key={comment.comment_id} comment={comment}/>
+                        <Comment key={comment.comment_id} comment={comment} onNewReply={handleNewReply} />
                         // <div className={classes.comment} key={comment.comment_id} style={{ paddingLeft: `${0.5 + (comment.depth || 0) * 3}rem` }}>
                         //     <p className={classes.user}>{comment.user_id}</p>
                         //     <input className={classes.content} value={comment.content} readOnly />
@@ -100,10 +104,6 @@ function MainComment(props){
                         // </div>
                 )})}
             </div>
-            {/* <div className={classes.newcomment}>
-                <p>New Comment</p>
-                <NewComment depth={-1} boardID={boardID} />
-            </div> */}
             <form onSubmit={submitHandler} className={classes.newcomment} style={{ paddingLeft: '0.5rem' }}>
                 <p>New Comment</p>
                 User : <input type='text' id='user' ref={userInputRef} className={classes.user} />
