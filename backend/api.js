@@ -221,6 +221,26 @@ app.delete('/deletecomment/:commentid', async (req, res) => {
     }
 });
 
+// 댓글 수정
+app.put('/modifycomment/:commentid', async (req, res) => {
+    const commentID = req.params.commentid;
+    const { userInput, contentInput } = req.body;
+    const conn = await getConn();
+
+    const query = 'UPDATE comment SET user_id = ?, content = ? WHERE comment_id = ?';
+
+    try{
+        await conn.query(query, [userInput, contentInput, commentID])
+        console.log('Update Comment Success!');
+        conn.release();
+        return res.status(200).json({ success: true, message: 'Comment updated successfully'});
+    } catch(err) {
+        console.log(`Update Comment Error : ${err}`);
+        conn.release();
+        return res.status(500).json({ success: false, message: 'Failed to Update comment' });
+    }
+});
+
 // // 파일 저장 설정 (저장경로, 파일명)
 // const storage = multer.diskStorage({
 //     destination: (req, file, cb) => {

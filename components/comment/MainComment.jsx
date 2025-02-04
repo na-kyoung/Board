@@ -7,7 +7,6 @@ import { useRouter } from "next/router";
 function MainComment(props){
     // console.log('MainComment Start', props.postID);
     const [commentData, setCommentData] = useState([]); // DB에서 가져온 데이터
-    // const [replyBtn, setReplyBtn] = useState(Array(commentData.length).fill(false));
     const [newComment, setNewComment] = useState(false); // 새로운 댓글 작성시 댓글 조회 트리거
     const [changeComment, setChangeComment] = useState(false); // 댓글 변화 시(수정, 삭제, 답글 작성) 조회 트리거
     const boardID = props.postID;
@@ -48,7 +47,7 @@ function MainComment(props){
         event.target.reset(); // 초기화
     }
 
-    // 글 생성
+    // 댓글 생성
     const createComment = async () => {
         const user_id = userInputRef.current.value;
         const content = commentInputRef.current.value;
@@ -78,7 +77,7 @@ function MainComment(props){
         }
     };
 
-    // 대댓글 생성시 
+    // 댓글 변화시 재조회 (대댓글 작성, 댓글 수정/삭제)
     function handleChangeComment(){
         setChangeComment((changeComment) => !changeComment);
     }
