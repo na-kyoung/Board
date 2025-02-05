@@ -3,12 +3,23 @@ const bodyParser = require("body-parser");
 const mysql = require('mysql2/promise');
 const multer = require('multer');
 const path = require('path');
+const fs = require("fs");
 
 const app = express();
 
 // app.use(express.static('images')); // 이미지 파일 제공
+
+// 파일 저장 폴더 설정
+const uploadDir = path.join(__dirname, "uploads");
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
 app.use(bodyParser.json());
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+// app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use("/uploads", express.static(uploadDir)); // 업로드 파일 제공
 
 // CORS
 app.use((req, res, next) => {
@@ -31,14 +42,19 @@ const getConn = async() => {
   return await pool.getConnection(async (conn) => conn);
 };
 
-app.get('/testSelect', async (req, res) => {
-  const conn = await getConn();
-  const query = 'SELECT * FROM posttest';
-  let [rows, fields] = await conn.query(query, []);
-  conn.release();
-
-  res.send(rows);
+// 서버 실행
+app.listen('5000', () => {
+  console.log('Server started');
 });
+
+// app.get('/testSelect', async (req, res) => {
+//   const conn = await getConn();
+//   const query = 'SELECT * FROM posttest';
+//   let [rows, fields] = await conn.query(query, []);
+//   conn.release();
+
+//   res.send(rows);
+// });
 
 // 게시판 전체 조회
 app.get('/board', async (req, res) => {
@@ -208,6 +224,128 @@ app.put('/modifycomment/:commentid', async (req, res) => {
   }
 });
 
+// 파일 업로드 설정 (Multer)
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, uploadDir),
+  filename: (req, file, cb) => cb(null, Date.now() + "_" + path.extname(file.originalname)),
+});
+const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
+
+// 파일 업로드
+app.post('/uploadfile', upload.single("file"), async (req, res) => {
+  const conn = await getConn();
+  const filePath = `/uploads/${req.file.filename}`;
+
+  const query = "INSERT INTO file VALUES (NULL, ?, ?, ?, now())";
+
+  try {
+    // await conn.query(query, [postID, req.file.filename, filePath]);
+    // conn.release();
+    // console.log('File Upload Success!');
+    // res.json({ message: "파일 업로드 성공", url: filePath });
+    await conn.query(query, [post_id, req.file.filename, filePath]);
+    console.log('File Upload Success!');
+    conn.release();
+    return res.status(200).json({ success: true, message: 'Create File Success!', url: filePath});
+  } catch (err) {
+    // console.log(`File Upload Error : ${err}`);
+    // conn.release();
+    // res.status(500).json({ error: "파일 업로드 실패", message: err.message });
+    console.log(`File Upload Error : ${err}`);
+    conn.release();
+    return res.status(500).json({ success: false, message: 'Failed to Create File' });
+  }
+});
+
+// 📌 여러 개의 파일 업로드 API
+app.post("/uploadfiles", upload.array("files", 10), async (req, res) => {
+  const { post_id } = req.body;
+  // console.log('uploadfiles ...', post_id);
+  // console.log(req.files);
+
+  if (!req.files || req.files.length === 0) {
+    return res.status(400).json({ error: "업로드된 파일이 없습니다." });
+  }
+
+  const conn = await getConn();
+
+  const uploadedFiles = req.files.map((file) => {
+    return {
+      filename: file.filename,
+      url: `/uploads/${file.filename}`
+    };
+  });
+
+  const query = "INSERT INTO file (post_id, file_path, file_name, created_at) VALUES ?";
+  // const values = uploadedFiles.map(file => [file.url, file.filename]);
+  const values = uploadedFiles.map(file => [post_id, file.url, file.filename, new Date()]);
+  
+  try {
+    if (values.length === 0) {
+      throw new Error("업로드된 파일이 없습니다.");
+    }
+
+    await conn.query(query, [values]);
+    console.log('Upload Files Success!');
+    conn.release();
+    res.json({ message: "파일 업로드 성공", files: uploadedFiles });
+  } catch (err) {
+    console.log(`Upload Files Error : ${err}`);
+    conn.release();
+    res.status(500).json({ error: "파일 업로드 실패", message: err.message });
+  }
+});
+
+// 파일 조회
+app.get("/file/:postid", async (req, res) => {
+  const postID = req.params.postid;
+  const serverUrl = "http://localhost:5000";
+
+  const conn = await getConn();
+  
+  const query = "SELECT file_id, post_id, file_name, created_at,"
+              + ` CONCAT('${serverUrl}', file_path) as file_path`
+              + " FROM file WHERE post_id = ? ORDER BY file_id";
+
+  try {
+    const [rows] = await conn.query(query, [postID]);
+    conn.release();
+    console.log('Select File Success!');
+    res.send(rows);
+  } catch (err) {
+    console.log(`Select File Error : ${err}`);
+    conn.release();
+    res.status(500).json({ error: "파일 목록 조회 실패", message: err.message });
+  }
+});
+
+// 파일 삭제
+app.delete("/deletefile/:fileid", async (req, res) => {
+  const fileID = req.params.fileid;
+  const { file_name } = req.body;
+  const conn = await getConn();
+  const filePath = path.join(uploadDir, file_name);
+  console.log('delete file ...', fileID);
+
+  const query = "DELETE FROM file WHERE file_id = ?";
+  
+  try {
+    // 로컬 파일 삭제
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+    await conn.query(query, [fileID]);
+    conn.release();
+    console.log('Delete File Success!');
+    res.json({ message: "파일 삭제 성공" });
+  } catch (err) {
+    console.log(`Delete File Error : ${err}`);
+    conn.release();
+    res.status(500).json({ error: "파일 삭제 실패", message: err.message });
+  }
+});
+
+
 // // 파일 저장 설정 (저장경로, 파일명)
 // const storage = multer.diskStorage({
 //     destination: (req, file, cb) => {
@@ -279,7 +417,3 @@ app.put('/modifycomment/:commentid', async (req, res) => {
 //   }
 //   res.status(404).json({ message: '404 - Not Found' });
 // });
-
-app.listen('5000', () => {
-  console.log('Server started');
-});

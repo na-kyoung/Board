@@ -5,6 +5,8 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Comment from '../comment/MainComment';
 import classes from './Board.module.css';
+import File from '../file/File';
+import FileUpload from '../file/FileUpload';
 
 function Board(props) {
   console.log('Board Start!');
@@ -13,7 +15,7 @@ function Board(props) {
   // 파라미터에서 id 가져오기
   const router  = useRouter();
   const boardID = router.query.boardID;
-  console.log(boardID);
+  // console.log(boardID);
 
   // 글 조회
   useEffect(() => {
@@ -99,6 +101,7 @@ function Board(props) {
       </div>
       </form>
       {/* <FileUpload postID={boardID} /> */}
+      <File postID={boardID} />
       <Comment postID={boardID} />
     </>
   );

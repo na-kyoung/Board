@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import classes from './ModifyBoard.module.css';
+import ModifyFile from '../file/ModifyFile';
 
 function ModifyBoard(props) {
   const modifyData = props.modifyData;
@@ -78,6 +79,7 @@ function ModifyBoard(props) {
           <button>Modify</button>
         </div>
       </form>
+      <ModifyFile postID={boardID} />
     </>
   );
 }

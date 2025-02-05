@@ -65,6 +65,9 @@ function NewBoard(props) {
             required
           ></textarea>
         </div>
+        <div>
+          
+        </div>
         <div className={classes.actions}>
           <button>Write</button>
         </div>
