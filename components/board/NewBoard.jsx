@@ -56,10 +56,6 @@ function NewBoard(props) {
           <label htmlFor='writer'>Writer</label>
           <input type='text' id='writer' ref={writerInputRef} required />
         </div>
-        {/* <div className={classes.control}>
-          <label htmlFor='date'>Date</label>
-          <input type='date' id='date' ref={dateInputRef} required />
-        </div> */}
         <div className={classes.control}>
           <label htmlFor='content'>Content</label>
           <textarea

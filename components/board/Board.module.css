@@ -1,65 +1,56 @@
 .form {
-    padding: 1rem;
-  }
-  
-  .control {
-    margin-bottom: 0.5rem;
-  }
-  
-  /* .control label {
-    display: block;
-    font-weight: bold;
-    margin-bottom: 0.5rem;
-  } */
-  
-  .control h2, 
-  .control h4 {
-    margin-bottom: 1.5rem;
-  }
+  padding: 1rem;
+}
 
-  .control h4 {
-    display: inline-block;
-  }
+.control {
+  margin-bottom: 0.5rem;
+}
 
-  .controlwriter {
-    float: right;
-  }
+.control h2, 
+.control h4 {
+  margin-bottom: 1.5rem;
+}
 
-  .control input,
-  .control textarea {
-    display: block;
-    font: inherit;
-    /* border-radius: 4px; */
-    /* border: 1px solid #ccc; */
-    border: none;
-    /* padding: 0.5rem; */
-    width: 100%;
-    resize: none;
-  }
-  
-  .control textarea:focus {
-    outline: none;
-  }
+.control h4 {
+  display: inline-block;
+}
 
-  .actions {
-    margin-top: 1rem;
-    text-align: right;
-  }
-  
-  .actions button {
-    font: inherit;
-    cursor: pointer;
-    background-color: #636363;
-    color: white;
-    padding: 0.5rem 1.0rem;
-    border: 1px solid #636363;
-    border-radius: 4px;
-    font-weight: bold;
-    margin-left: 0.3rem;
-  }
-  
-  .actions button:hover,
-  .actions button:active {
-    background-color: #969696;
-    border-color: #969696;
-  }
+.controlwriter {
+  float: right;
+}
+
+.control input,
+.control textarea {
+  display: block;
+  font: inherit;
+  border: none;
+  width: 100%;
+  resize: none;
+}
+
+.control textarea:focus {
+  outline: none;
+}
+
+.actions {
+  margin-top: 1rem;
+  text-align: right;
+}
+
+.actions button {
+  font: inherit;
+  cursor: pointer;
+  background-color: #636363;
+  color: white;
+  padding: 0.5rem 1.0rem;
+  border: 1px solid #636363;
+  border-radius: 4px;
+  font-weight: bold;
+  margin-left: 0.3rem;
+}
+
+.actions button:hover,
+.actions button:active {
+  background-color: #969696;
+  border-color: #969696;
+}

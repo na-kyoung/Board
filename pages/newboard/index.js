@@ -3,7 +3,7 @@
 import NewBoard from "@/components/board/NewBoard";
 
 function NewBoardPage(){
-    return <NewBoard />
+  return <NewBoard /> ;
 }
 
 export default NewBoardPage;

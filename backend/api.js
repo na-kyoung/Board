@@ -20,225 +20,192 @@ app.use((req, res, next) => {
 
 // DB 연동
 const pool = mysql.createPool({
-    host: 'localhost',
-    port: '3306',
-    user: 'root',
-    password: '111111',
-    database: 'board_db'
+  host: 'localhost',
+  port: '3306',
+  user: 'root',
+  password: '111111',
+  database: 'board_db'
 });
 
 const getConn = async() => {
-    return await pool.getConnection(async (conn) => conn);
+  return await pool.getConnection(async (conn) => conn);
 };
 
 app.get('/testSelect', async (req, res) => {
-    const conn = await getConn();
-    const query = 'SELECT * FROM posttest';
-    let [rows, fields] = await conn.query(query, []);
-    conn.release();
+  const conn = await getConn();
+  const query = 'SELECT * FROM posttest';
+  let [rows, fields] = await conn.query(query, []);
+  conn.release();
 
-    res.send(rows);
+  res.send(rows);
 });
 
 // 게시판 전체 조회
 app.get('/board', async (req, res) => {
-    // const postID = req.params.postid;
-    const conn = await getConn();
-    const query = 'SELECT row_number() over (order by post_id) as no,'
-                + ' post_id, user_id, title,'
-                + ` CONCAT(LEFT(content, 13), '...') AS content, created_at`
-                + ' FROM post ORDER BY post_id';
-    let [rows, fields] = await conn.query(query, []);
-    conn.release();
-    // console.log(rows);
+  // const postID = req.params.postid;
+  const conn = await getConn();
+  const query = 'SELECT row_number() over (order by post_id) as no,'
+              + ' post_id, user_id, title,'
+              + ` CONCAT(LEFT(content, 13), '...') AS content, created_at`
+              + ' FROM post ORDER BY post_id';
+  let [rows, fields] = await conn.query(query, []);
+  conn.release();
+  // console.log(rows);
 
-    res.send(rows);
+  res.send(rows);
 });
 
-// 게시글 조회
+// 게시글 단일 조회
 app.get('/board/:postid', async (req, res) => {
-    const postID = req.params.postid;
-    const conn = await getConn();
-    const query = 'SELECT * FROM POST where post_id = ?';
-    let [rows, fields] = await conn.query(query, [postID]);
-    conn.release();
+  const postID = req.params.postid;
+  const conn = await getConn();
+  const query = 'SELECT * FROM POST where post_id = ?';
+  let [rows, fields] = await conn.query(query, [postID]);
+  conn.release();
 
-    res.send(rows);
+  res.send(rows);
 });
 
 // 게시글 수정
-// app.put('/modifyboard/:postid', async (req, res) => {
-//     const postID = req.params.postid;
-//     const { title, user_id, content } = req.body;
-//     const conn = await getConn();
-
-//     const query = 'UPDATE post SET title = ?, user_id = ?, content = ? WHERE post_id = ?';
-
-//     await conn.query(query, [title, user_id, content, postID], (err, results) => {
-//         if (err) {
-//             console.log(`query Error : ${err}`);
-//             return res.status(500).json({ success: false, message: 'Failed to update post' });
-//         }
-//         console.log("sadfasdf");
-//         return res.status(200).json({ success: true, message: 'Post updated successfully', data: results });
-//     });
-//     conn.release();
-// });
 app.put('/modifyboard/:postid', async (req, res) => {
-    const postID = req.params.postid;
-    const { title, user_id, content } = req.body;
-    const conn = await getConn();
+  const postID = req.params.postid;
+  const { title, user_id, content } = req.body;
+  const conn = await getConn();
 
-    const query = 'UPDATE post SET title = ?, user_id = ?, content = ? WHERE post_id = ?';
+  const query = 'UPDATE post SET title = ?, user_id = ?, content = ? WHERE post_id = ?';
 
-    try{
-        await conn.query(query, [title, user_id, content, postID])
-        console.log('Update Board Success!');
-        conn.release();
-        return res.status(200).json({ success: true, message: 'Post updated successfully'});
-    } catch(err) {
-        console.log(`Update Board Error : ${err}`);
-        conn.release();
-        return res.status(500).json({ success: false, message: 'Failed to update post' });
-    }
+  try{
+    await conn.query(query, [title, user_id, content, postID])
+    console.log('Update Board Success!');
+    conn.release();
+    return res.status(200).json({ success: true, message: 'Post updated successfully'});
+  } catch(err) {
+    console.log(`Update Board Error : ${err}`);
+    conn.release();
+    return res.status(500).json({ success: false, message: 'Failed to update post' });
+  }
 });
 
 // 게시글 생성
 app.post('/createboard', async (req, res) => {
-    const { title, user_id, content } = req.body;
-    const conn = await getConn();
+  const { title, user_id, content } = req.body;
+  const conn = await getConn();
 
-    const query = 'INSERT INTO post VALUES (null, ?, ?, ?, now())';
+  const query = 'INSERT INTO post VALUES (null, ?, ?, ?, now())';
 
-    try{
-        await conn.query(query, [user_id, title, content]);
-        console.log('Create Board Success!');
-        conn.release();
-        return res.status(200).json({ success: true, message: 'Create Board Success!'});
-    } catch(err) {
-        console.log(`Create Board Error : ${err}`);
-        conn.release();
-        return res.status(500).json({ success: false, message: 'Failed to Create post' });
-    }
+  try{
+    await conn.query(query, [user_id, title, content]);
+    console.log('Create Board Success!');
+    conn.release();
+    return res.status(200).json({ success: true, message: 'Create Board Success!'});
+  } catch(err) {
+    console.log(`Create Board Error : ${err}`);
+    conn.release();
+    return res.status(500).json({ success: false, message: 'Failed to Create post' });
+  }
 });
 
 // 게시글 삭제
 app.delete('/deleteboard/:postid', async (req, res) => {
-    const postID = req.params.postid;
-    const conn = await getConn();
+  const postID = req.params.postid;
+  const conn = await getConn();
 
-    const query = 'DELETE FROM post WHERE post_id = ?';
+  const query = 'DELETE FROM post WHERE post_id = ?';
 
-    try{
-        await conn.query(query, [postID]);
-        console.log('Delete Board Success!');
-        conn.release();
-        return res.status(200).json({ success: true, message: 'Delete Board Success!'});
-    } catch(err) {
-        console.log(`Delete Board Error : ${err}`);
-        conn.release();
-        return res.status(500).json({ success: false, message: 'Failed to Delete post' });
-    }
-
-    // db.query(query, [id], (err, results) => {
-    //   if (err) {
-    //     console.error('MySQL 삭제 오류:', err);
-    //     return res.status(500).json({ error: 'Database deletion failed' });
-    //   }
-  
-    //   if (results.affectedRows === 0) {
-    //     return res.status(404).json({ message: 'User not found' });
-    //   }
-  
-    //   return res.status(200).json({
-    //     message: `User with ID ${id} deleted successfully`,
-    //   });
-    // });
+  try{
+    await conn.query(query, [postID]);
+    console.log('Delete Board Success!');
+    conn.release();
+    return res.status(200).json({ success: true, message: 'Delete Board Success!'});
+  } catch(err) {
+    console.log(`Delete Board Error : ${err}`);
+    conn.release();
+    return res.status(500).json({ success: false, message: 'Failed to Delete post' });
+  }
 });
 
 // 댓글 조회
 app.get('/comment/:postid', async (req, res) => {
-    const postID = req.params.postid;
-    const conn = await getConn();
-    // const query = 'SELECT * FROM Comment'
-    //             + ' WHERE parent_id IS NULL AND post_id = ?'
-    //             + ' UNION ALL'
-    //             + ' SELECT * FROM Comment'
-    //             + ' WHERE parent_id IS NOT NULL AND post_id = ?'
-    //             + ' ORDER BY COALESCE(parent_id, comment_id), created_at';
-    const query = 'WITH RECURSIVE CommentTree AS ('
-                + ` SELECT a.*, CAST(LPAD(comment_id, 10, '0') AS CHAR(255)) AS path`
-                + ' FROM Comment a'
-                + ' WHERE post_id = ? AND parent_id IS NULL'
-                + ' UNION ALL'
-                + ` SELECT c.*, CONCAT(t.path, ',', LPAD(c.comment_id, 10, '0'))`
-                + ' FROM Comment c'
-                + ' INNER JOIN CommentTree t ON c.parent_id = t.comment_id)'
-                + ' SELECT * FROM CommentTree'
-                + ' ORDER BY LEFT(path, 10), path, created_at';
-    let [rows, fields] = await conn.query(query, [postID]);
-    conn.release();
-    // console.log(rows);
+  const postID = req.params.postid;
+  const conn = await getConn();
+  // const query = 'SELECT * FROM Comment'
+  //             + ' WHERE parent_id IS NULL AND post_id = ?'
+  //             + ' UNION ALL'
+  //             + ' SELECT * FROM Comment'
+  //             + ' WHERE parent_id IS NOT NULL AND post_id = ?'
+  //             + ' ORDER BY COALESCE(parent_id, comment_id), created_at';
+  const query = 'WITH RECURSIVE CommentTree AS ('
+              + ` SELECT a.*, CAST(LPAD(comment_id, 10, '0') AS CHAR(255)) AS path`
+              + ' FROM Comment a'
+              + ' WHERE post_id = ? AND parent_id IS NULL'
+              + ' UNION ALL'
+              + ` SELECT c.*, CONCAT(t.path, ',', LPAD(c.comment_id, 10, '0'))`
+              + ' FROM Comment c'
+              + ' INNER JOIN CommentTree t ON c.parent_id = t.comment_id)'
+              + ' SELECT * FROM CommentTree'
+              + ' ORDER BY LEFT(path, 10), path, created_at';
+  let [rows, fields] = await conn.query(query, [postID]);
+  conn.release();
 
-    res.send(rows);
+  res.send(rows);
 });
 
 // 댓글 생성
 app.post('/createcomment', async (req, res) => {
-    const { post_id, user_id, parent_id, content, depth } = req.body;
-    const conn = await getConn();
+  const { post_id, user_id, parent_id, content, depth } = req.body;
+  const conn = await getConn();
 
-    const query = 'INSERT INTO comment VALUES (null, ?, ?, ?, ?, ?, now())';
+  const query = 'INSERT INTO comment VALUES (null, ?, ?, ?, ?, ?, now())';
 
-    try{
-        await conn.query(query, [post_id, user_id, parent_id, content, depth]);
-        console.log('Create Comment Success!');
-        conn.release();
-        return res.status(200).json({ success: true, message: 'Create Comment Success!'});
-    } catch(err) {
-        console.log(`Create Comment Error : ${err}`);
-        conn.release();
-        return res.status(500).json({ success: false, message: 'Failed to Create comment' });
-    }
+  try{
+    await conn.query(query, [post_id, user_id, parent_id, content, depth]);
+    console.log('Create Comment Success!');
+    conn.release();
+    return res.status(200).json({ success: true, message: 'Create Comment Success!'});
+  } catch(err) {
+    console.log(`Create Comment Error : ${err}`);
+    conn.release();
+    return res.status(500).json({ success: false, message: 'Failed to Create comment' });
+  }
 });
 
 // 댓글 삭제
 app.delete('/deletecomment/:commentid', async (req, res) => {
-    const commentID = req.params.commentid;
-    const conn = await getConn();
+  const commentID = req.params.commentid;
+  const conn = await getConn();
 
-    const query = 'DELETE FROM comment WHERE comment_id = ?';
+  const query = 'DELETE FROM comment WHERE comment_id = ?';
 
-    try{
-        await conn.query(query, [commentID]);
-        console.log('Delete Comment Success!');
-        conn.release();
-        return res.status(200).json({ success: true, message: 'Delete Comment Success!'});
-    } catch(err) {
-        console.log(`Delete Comment Error : ${err}`);
-        conn.release();
-        return res.status(500).json({ success: false, message: 'Failed to Delete comment' });
-    }
+  try{
+    await conn.query(query, [commentID]);
+    console.log('Delete Comment Success!');
+    conn.release();
+    return res.status(200).json({ success: true, message: 'Delete Comment Success!'});
+  } catch(err) {
+    console.log(`Delete Comment Error : ${err}`);
+    conn.release();
+    return res.status(500).json({ success: false, message: 'Failed to Delete comment' });
+  }
 });
 
 // 댓글 수정
 app.put('/modifycomment/:commentid', async (req, res) => {
-    const commentID = req.params.commentid;
-    const { userInput, contentInput } = req.body;
-    const conn = await getConn();
+  const commentID = req.params.commentid;
+  const { userInput, contentInput } = req.body;
+  const conn = await getConn();
 
-    const query = 'UPDATE comment SET user_id = ?, content = ? WHERE comment_id = ?';
+  const query = 'UPDATE comment SET user_id = ?, content = ? WHERE comment_id = ?';
 
-    try{
-        await conn.query(query, [userInput, contentInput, commentID])
-        console.log('Update Comment Success!');
-        conn.release();
-        return res.status(200).json({ success: true, message: 'Comment updated successfully'});
-    } catch(err) {
-        console.log(`Update Comment Error : ${err}`);
-        conn.release();
-        return res.status(500).json({ success: false, message: 'Failed to Update comment' });
-    }
+  try{
+    await conn.query(query, [userInput, contentInput, commentID])
+    console.log('Update Comment Success!');
+    conn.release();
+    return res.status(200).json({ success: true, message: 'Comment updated successfully'});
+  } catch(err) {
+    console.log(`Update Comment Error : ${err}`);
+    conn.release();
+    return res.status(500).json({ success: false, message: 'Failed to Update comment' });
+  }
 });
 
 // // 파일 저장 설정 (저장경로, 파일명)
@@ -314,5 +281,5 @@ app.put('/modifycomment/:commentid', async (req, res) => {
 // });
 
 app.listen('5000', () => {
-    console.log('Server started');
+  console.log('Server started');
 });

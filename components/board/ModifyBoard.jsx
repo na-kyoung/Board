@@ -6,8 +6,7 @@ import classes from './ModifyBoard.module.css';
 
 function ModifyBoard(props) {
   const modifyData = props.modifyData;
-  // console.log(modifyData);
-
+  
   const [content, setContent] = useState(modifyData.content);
 
   const titleInputRef = useRef();
@@ -50,19 +49,6 @@ function ModifyBoard(props) {
     } catch (error) {
       console.error('Error updating data :', error);
     }
-
-    // fetch(`http://localhost:5000/modifyboard/${boardID}`, {
-    //   method: 'PUT',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //   },
-    //   body: JSON.stringify({ title, user_id, content }),
-    // })
-    // .then((res) => res.json())
-    // .then((result) => {
-    //   console.log(result);
-    //   router.push(`/${boardID}`);
-    // });
   };
 
   return (
@@ -76,10 +62,6 @@ function ModifyBoard(props) {
           <label htmlFor='writer'>Writer</label>
           <input type='text' id='writer' ref={writerInputRef} defaultValue={modifyData.writer} required />
         </div>
-        {/* <div className={classes.control}>
-          <label htmlFor='date'>Date</label>
-          <input type='date' id='date' ref={dateInputRef} defaultValue={modifyData.date} readOnly />
-        </div> */}
         <div className={classes.control}>
           <label htmlFor='content'>Content</label>
           <textarea
