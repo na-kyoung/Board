@@ -1,7 +1,7 @@
-import { useRef } from 'react';
-
-import classes from './NewBoard.module.css';
+import { useRef, useState } from 'react';
 import { useRouter } from 'next/router';
+import NewFile from '../file/NewFile';
+import classes from './NewBoard.module.css';
 
 function NewBoard(props) {
   const titleInputRef = useRef();
@@ -10,13 +10,17 @@ function NewBoard(props) {
 
   const router  = useRouter();
 
+  const [content, setContent] = useState(); // textarea 내용
+  const [completedSave, setCompletedSave] = useState(false); // DB 수정 완료
+  const [insertID, setInsertID] = useState(false); // 저장 후 가져온 key값
+
   function submitHandler(event) {
     event.preventDefault();
     createBoard();
   }
 
   // 글 생성
-  const createBoard = async () => {
+  async function createBoard(){
     const title = titleInputRef.current.value;
     const user_id = writerInputRef.current.value;
     const content = contentInputRef.current.value;
@@ -35,13 +39,34 @@ function NewBoard(props) {
 
       if (result.success) {
         console.log('글 생성 완료!');
-        router.push(`/`); // 메인화면 이동
-        // router.push(window.location.origin + `/${boardID}`);  // 절대 경로
+        setCompletedSave((completedSave) => !completedSave); // 저장완료여부 자식 컴포넌트에 전달
+        setInsertID(result.rows.insertId); // key값 변경
       } else {
         console.log('글 생성 실패 : ' + result.message);
       }
     } catch (error) {
       console.error('Error creating data :', error);
+    }
+  };
+
+  // 파일 업로드까지 완료시 화면 이동
+  function handleRouting(){
+    router.push(`/`); // 메인화면 이동
+    // router.push(window.location.origin + `/${boardID}`);  // 절대 경로
+  }
+
+  // textarea 입력 초과시 높이 조절
+  function handleTextareaChange(e){
+    setContent(e.target.value);
+    resizeTextarea();
+  }
+
+  // textarea 높이 조절
+  const resizeTextarea = () => {
+    const textarea = contentInputRef.current;
+    if (textarea) {
+      textarea.style.height = "auto"; // 높이 초기화 후 다시 계산
+      textarea.style.height = textarea.scrollHeight + "px";
     }
   };
 
@@ -62,6 +87,8 @@ function NewBoard(props) {
             id='content'
             rows='15'
             ref={contentInputRef}
+            value={content}
+            onChange={handleTextareaChange}
             required
           ></textarea>
         </div>
@@ -72,6 +99,7 @@ function NewBoard(props) {
           <button>Write</button>
         </div>
       </form>
+      <NewFile postID={insertID} completedSave={completedSave} onUpload={handleRouting} />
     </>
   );
 }

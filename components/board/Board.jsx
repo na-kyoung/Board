@@ -1,16 +1,18 @@
 "use client"; // CSR
 
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Comment from '../comment/MainComment';
-import classes from './Board.module.css';
 import File from '../file/File';
-import FileUpload from '../file/FileUpload';
+import classes from './Board.module.css';
 
 function Board(props) {
   console.log('Board Start!');
   const [boardData, setBoardData] = useState([]); // DB에서 가져온 데이터
+  const [content, setContent] = useState(); // textarea 내용
+
+  const contentInputRef = useRef();
 
   // 파라미터에서 id 가져오기
   const router  = useRouter();
@@ -27,6 +29,7 @@ function Board(props) {
       // console.log(resData);
       const data = await dateFormat(resData[0]);
       setBoardData(data);
+      setContent(data.content);
     }
 
     fetchBoard();
@@ -69,6 +72,26 @@ function Board(props) {
     }
   };
 
+  // textarea 입력 초과시 높이 조절
+  function handleTextareaChange(e){
+    // setContent(e.target.value);
+    resizeTextarea();
+  }
+
+  // textarea 높이 조절
+  const resizeTextarea = () => {
+    const textarea = contentInputRef.current;
+    if (textarea) {
+      textarea.style.height = "auto"; // 높이 초기화 후 다시 계산
+      textarea.style.height = textarea.scrollHeight + "px";
+    }
+  };
+
+  // textarea 높이 조절
+  useEffect(() => {
+    resizeTextarea();
+  }, [content]);
+
   return (
     <>
       <form className={classes.form}>
@@ -80,7 +103,7 @@ function Board(props) {
         <h4 className={classes.controlwriter}> {boardData.user_id} </h4>
       </div>
       <div className={classes.control}>
-        <textarea id="content" rows="15" value={boardData.content} readOnly />
+        <textarea id="content" rows="1" value={content} ref={contentInputRef} onChange={handleTextareaChange} readOnly />
       </div>
       <div className={classes.actions}>
         <button type='button'>

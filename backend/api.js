@@ -2,12 +2,10 @@ const express = require('express');
 const bodyParser = require("body-parser");
 const mysql = require('mysql2/promise');
 const multer = require('multer');
-const path = require('path');
-const fs = require("fs");
+const path = require('path'); // 경로 모듈
+const fs = require("fs"); // 파일 시스템 모듈
 
 const app = express();
-
-// app.use(express.static('images')); // 이미지 파일 제공
 
 // 파일 저장 폴더 설정
 const uploadDir = path.join(__dirname, "uploads");
@@ -47,15 +45,6 @@ app.listen('5000', () => {
   console.log('Server started');
 });
 
-// app.get('/testSelect', async (req, res) => {
-//   const conn = await getConn();
-//   const query = 'SELECT * FROM posttest';
-//   let [rows, fields] = await conn.query(query, []);
-//   conn.release();
-
-//   res.send(rows);
-// });
-
 // 게시판 전체 조회
 app.get('/board', async (req, res) => {
   // const postID = req.params.postid;
@@ -64,11 +53,17 @@ app.get('/board', async (req, res) => {
               + ' post_id, user_id, title,'
               + ` CONCAT(LEFT(content, 13), '...') AS content, created_at`
               + ' FROM post ORDER BY post_id';
-  let [rows, fields] = await conn.query(query, []);
-  conn.release();
-  // console.log(rows);
-
-  res.send(rows);
+  
+  try {
+    let [rows] = await conn.query(query, []);
+    conn.release();
+    console.log('Select All Board Success!');
+    res.send(rows);
+  } catch (err) {
+    console.log(`Select All Board Error : ${err}`);
+    conn.release();
+    res.status(500).json({ error: "글 목록 조회 실패", message: err.message });
+  }
 });
 
 // 게시글 단일 조회
@@ -76,10 +71,17 @@ app.get('/board/:postid', async (req, res) => {
   const postID = req.params.postid;
   const conn = await getConn();
   const query = 'SELECT * FROM POST where post_id = ?';
-  let [rows, fields] = await conn.query(query, [postID]);
-  conn.release();
 
-  res.send(rows);
+  try {
+    let [rows] = await conn.query(query, [postID]);
+    conn.release();
+    console.log('Select Board Success!');
+    res.send(rows);
+  } catch (err) {
+    console.log(`Select Board Error : ${err}`);
+    conn.release();
+    res.status(500).json({ error: "글 조회 실패", message: err.message });
+  }
 });
 
 // 게시글 수정
@@ -94,11 +96,11 @@ app.put('/modifyboard/:postid', async (req, res) => {
     await conn.query(query, [title, user_id, content, postID])
     console.log('Update Board Success!');
     conn.release();
-    return res.status(200).json({ success: true, message: 'Post updated successfully'});
+    return res.status(200).json({ success: true, message: 'Board updated successfully'});
   } catch(err) {
     console.log(`Update Board Error : ${err}`);
     conn.release();
-    return res.status(500).json({ success: false, message: 'Failed to update post' });
+    return res.status(500).json({ success: false, message: 'Failed to update board' });
   }
 });
 
@@ -110,14 +112,16 @@ app.post('/createboard', async (req, res) => {
   const query = 'INSERT INTO post VALUES (null, ?, ?, ?, now())';
 
   try{
-    await conn.query(query, [user_id, title, content]);
+    let [rows, fields] = await conn.query(query, [user_id, title, content]);
     console.log('Create Board Success!');
     conn.release();
-    return res.status(200).json({ success: true, message: 'Create Board Success!'});
+    res.send({rows, success: true});
+    console.log('Create Board Result :', rows); // 파일생성을 위한 key값 전달
+    // return res.status(200).json({ success: true, message: 'Create Board Success!'});
   } catch(err) {
     console.log(`Create Board Error : ${err}`);
     conn.release();
-    return res.status(500).json({ success: false, message: 'Failed to Create post' });
+    return res.status(500).json({ success: false, message: 'Failed to Create board' });
   }
 });
 
@@ -125,10 +129,32 @@ app.post('/createboard', async (req, res) => {
 app.delete('/deleteboard/:postid', async (req, res) => {
   const postID = req.params.postid;
   const conn = await getConn();
-
-  const query = 'DELETE FROM post WHERE post_id = ?';
+  console.log('deleteboard:', postID);
 
   try{
+    // 게시글의 로컬 파일 삭제
+    const getFileQuery = 'SELECT file_path, file_name FROM file WHERE post_id = ?';
+    let [rows] = await conn.query(getFileQuery, [postID]);
+
+    if (!Array.isArray(rows) || rows.length === 0) {
+      console.log("삭제할 파일이 없습니다.");
+    } else {
+      rows.forEach((row) => {
+        const filePath = path.join(uploadDir, row.file_name);
+        // console.log(filePath);
+
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath, (err) => {
+            if (err) console.error("파일 삭제 오류:", err);
+            else console.log("파일 삭제 성공:", row.file_path);
+          });
+        }
+      });
+    }
+
+    // 게시글 삭제 (파일 데이터 자동삭제)
+    const query = 'DELETE FROM post WHERE post_id = ?';
+  
     await conn.query(query, [postID]);
     console.log('Delete Board Success!');
     conn.release();
@@ -136,20 +162,15 @@ app.delete('/deleteboard/:postid', async (req, res) => {
   } catch(err) {
     console.log(`Delete Board Error : ${err}`);
     conn.release();
-    return res.status(500).json({ success: false, message: 'Failed to Delete post' });
+    return res.status(500).json({ success: false, message: 'Failed to Delete board' });
   }
 });
 
-// 댓글 조회
+// 댓글 목록 조회
 app.get('/comment/:postid', async (req, res) => {
   const postID = req.params.postid;
   const conn = await getConn();
-  // const query = 'SELECT * FROM Comment'
-  //             + ' WHERE parent_id IS NULL AND post_id = ?'
-  //             + ' UNION ALL'
-  //             + ' SELECT * FROM Comment'
-  //             + ' WHERE parent_id IS NOT NULL AND post_id = ?'
-  //             + ' ORDER BY COALESCE(parent_id, comment_id), created_at';
+
   const query = 'WITH RECURSIVE CommentTree AS ('
               + ` SELECT a.*, CAST(LPAD(comment_id, 10, '0') AS CHAR(255)) AS path`
               + ' FROM Comment a'
@@ -160,10 +181,17 @@ app.get('/comment/:postid', async (req, res) => {
               + ' INNER JOIN CommentTree t ON c.parent_id = t.comment_id)'
               + ' SELECT * FROM CommentTree'
               + ' ORDER BY LEFT(path, 10), path, created_at';
-  let [rows, fields] = await conn.query(query, [postID]);
-  conn.release();
 
-  res.send(rows);
+  try {
+    let [rows] = await conn.query(query, [postID]);
+    conn.release();
+    console.log('Select All Comment Success!');
+    res.send(rows);
+  } catch (err) {
+    console.log(`Select All Comment Error : ${err}`);
+    conn.release();
+    res.status(500).json({ error: "댓글 목록 조회 실패", message: err.message });
+  }
 });
 
 // 댓글 생성
@@ -227,46 +255,39 @@ app.put('/modifycomment/:commentid', async (req, res) => {
 // 파일 업로드 설정 (Multer)
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, uploadDir),
-  filename: (req, file, cb) => cb(null, Date.now() + "_" + path.extname(file.originalname)),
+  filename: (req, file, cb) => cb(null, Date.now() + "_" + path.extname(file.originalname)), // 파일명
 });
 const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
 
 // 파일 업로드
-app.post('/uploadfile', upload.single("file"), async (req, res) => {
-  const conn = await getConn();
-  const filePath = `/uploads/${req.file.filename}`;
+// app.post('/uploadfile', upload.single("file"), async (req, res) => {
+//   const conn = await getConn();
+//   const filePath = `/uploads/${req.file.filename}`;
 
-  const query = "INSERT INTO file VALUES (NULL, ?, ?, ?, now())";
+//   const query = "INSERT INTO file VALUES (NULL, ?, ?, ?, now())";
 
-  try {
-    // await conn.query(query, [postID, req.file.filename, filePath]);
-    // conn.release();
-    // console.log('File Upload Success!');
-    // res.json({ message: "파일 업로드 성공", url: filePath });
-    await conn.query(query, [post_id, req.file.filename, filePath]);
-    console.log('File Upload Success!');
-    conn.release();
-    return res.status(200).json({ success: true, message: 'Create File Success!', url: filePath});
-  } catch (err) {
-    // console.log(`File Upload Error : ${err}`);
-    // conn.release();
-    // res.status(500).json({ error: "파일 업로드 실패", message: err.message });
-    console.log(`File Upload Error : ${err}`);
-    conn.release();
-    return res.status(500).json({ success: false, message: 'Failed to Create File' });
-  }
-});
+//   try {
+//     // await conn.query(query, [postID, req.file.filename, filePath]);
+//     // conn.release();
+//     // console.log('File Upload Success!');
+//     // res.json({ message: "파일 업로드 성공", url: filePath });
+//     await conn.query(query, [post_id, req.file.filename, filePath]);
+//     console.log('File Upload Success!');
+//     conn.release();
+//     return res.status(200).json({ success: true, message: 'Create File Success!', url: filePath});
+//   } catch (err) {
+//     // console.log(`File Upload Error : ${err}`);
+//     // conn.release();
+//     // res.status(500).json({ error: "파일 업로드 실패", message: err.message });
+//     console.log(`File Upload Error : ${err}`);
+//     conn.release();
+//     return res.status(500).json({ success: false, message: 'Failed to Create File' });
+//   }
+// });
 
-// 📌 여러 개의 파일 업로드 API
+// 여러 개의 파일 업로드
 app.post("/uploadfiles", upload.array("files", 10), async (req, res) => {
   const { post_id } = req.body;
-  // console.log('uploadfiles ...', post_id);
-  // console.log(req.files);
-
-  if (!req.files || req.files.length === 0) {
-    return res.status(400).json({ error: "업로드된 파일이 없습니다." });
-  }
-
   const conn = await getConn();
 
   const uploadedFiles = req.files.map((file) => {
@@ -277,12 +298,12 @@ app.post("/uploadfiles", upload.array("files", 10), async (req, res) => {
   });
 
   const query = "INSERT INTO file (post_id, file_path, file_name, created_at) VALUES ?";
-  // const values = uploadedFiles.map(file => [file.url, file.filename]);
   const values = uploadedFiles.map(file => [post_id, file.url, file.filename, new Date()]);
   
   try {
-    if (values.length === 0) {
-      throw new Error("업로드된 파일이 없습니다.");
+    if (!req.files || req.files.length === 0) {
+      // return res.status(400).json({ error: "업로드된 파일이 없습니다." });
+      return res.status(200).json({ success: true, message: '파일 업로드 안함'});
     }
 
     await conn.query(query, [values]);
@@ -296,7 +317,7 @@ app.post("/uploadfiles", upload.array("files", 10), async (req, res) => {
   }
 });
 
-// 파일 조회
+// 파일 목록 조회
 app.get("/file/:postid", async (req, res) => {
   const postID = req.params.postid;
   const serverUrl = "http://localhost:5000";
@@ -344,76 +365,3 @@ app.delete("/deletefile/:fileid", async (req, res) => {
     res.status(500).json({ error: "파일 삭제 실패", message: err.message });
   }
 });
-
-
-// // 파일 저장 설정 (저장경로, 파일명)
-// const storage = multer.diskStorage({
-//     destination: (req, file, cb) => {
-//         cb(null, './uploads/');
-//     },
-//     filename: (req, file, cb) => {
-//         cb(null, `${Date.now()}-${file.originalname}`);
-//     }
-// });
-// const upload = multer({ storage });
-
-// // 파일 업로드 엔드포인트
-// app.post('/upload', upload.single('file'), (req, res) => {
-//     const file = req.file;
-//     if (!file) {
-//         return res.status(400).send('No file uploaded.');
-//     }
-
-//     const { filename, mimetype, size } = file;
-//     const filePath = `uploads/${filename}`;
-
-//     // MySQL에 저장
-//     const sql = 'INSERT INTO files (name, path, type, size) VALUES (?, ?, ?, ?)';
-//     db.query(sql, [filename, filePath, mimetype, size], (err, result) => {
-//         if (err) throw err;
-//         res.json({ id: result.insertId, filename, filePath });
-//     });
-// });
-
-// // 파일 목록 조회 API
-// app.get('/files', (req, res) => {
-//     const sql = 'SELECT id, name, path, type, size FROM files';
-//     db.query(sql, (err, results) => {
-//         if (err) {
-//             return res.status(500).send('Error fetching files');
-//         }
-//         res.json(results);
-//     });
-// });
-
-// app.get('/places', async (req, res) => {
-//   const fileContent = await fs.readFile('./data/places.json');
-
-//   const placesData = JSON.parse(fileContent);
-
-//   res.status(200).json({ places: placesData });
-// });
-
-// app.get('/user-places', async (req, res) => {
-//   const fileContent = await fs.readFile('./data/user-places.json');
-
-//   const places = JSON.parse(fileContent);
-
-//   res.status(200).json({ places });
-// });
-
-// app.put('/user-places', async (req, res) => {
-//   const places = req.body.places;
-
-//   await fs.writeFile('./data/user-places.json', JSON.stringify(places));
-
-//   res.status(200).json({ message: 'User places updated!' });
-// });
-
-// // 404
-// app.use((req, res, next) => {
-//   if (req.method === 'OPTIONS') {
-//     return next();
-//   }
-//   res.status(404).json({ message: '404 - Not Found' });
-// });

@@ -2,13 +2,14 @@ import { useEffect, useState } from "react";
 import UseFetchFile from "./UseFetchFile";
 import classes from './ModifyFile.module.css';
 
-function ModifyFile(props){
+function ModifyFile({ onUpload, ...props}){
   const post_id = props.postID;
+  console.log('ModifyFile postid :', post_id);
 
-  const [files, setFiles] = useState([]);
-  const [previewUrls, setPreviewUrls] = useState([]);
-  const [uploadedFiles, setUploadedFiles] = useState([]);
-  const [changeFile, setChangeFile] = useState(false);
+  const [files, setFiles] = useState([]); // 업로드할 파일 목록
+  const [previewUrls, setPreviewUrls] = useState([]); // 미리보기 url
+  const [uploadedFiles, setUploadedFiles] = useState([]); // 업로드 되어있는 파일 조회
+  const [changeFile, setChangeFile] = useState(false); // 파일 삭제시 재조회 트리거
 
   useEffect(() => {
     // 파일 조회
@@ -20,12 +21,19 @@ function ModifyFile(props){
     fetchfile();
   }, [changeFile]);
 
-  // 📌 파일 선택 시 미리보기
+
+  // 글 수정 완료 후 파일 업로드
+  if(props.completedSave){
+    handleUpload();
+  }
+
+  // 선택한 파일 미리보기
   const handleFileChange = (event) => {
     // console.log('선택한 파일 : ', event.target.files);
     const selectedFiles = Array.from(event.target.files);
     console.log("선택한 파일 목록:", selectedFiles);
-    setFiles(selectedFiles);
+    // setFiles(selectedFiles);
+    setFiles(prevFiles => [...prevFiles, ...selectedFiles]);
 
     const previews = selectedFiles.map((file) =>
       file.type.startsWith("image/") || file.type === "application/pdf"
@@ -33,33 +41,18 @@ function ModifyFile(props){
         : null
     );
 
-    setPreviewUrls(previews);
-
-    // // 로컬 미리보기 URL 생성
-    // const previews = selectedFiles.map((file) => {
-    //   // console.log("파일명:", file.name);
-    //   // console.log("파일 MIME 타입:", file.type);
-
-    //   // 📌 파일명이 .jpg.html이면 확장자를 확인하여 이미지로 처리
-    //   const isImage = file.name.match(/\.(jpg|jpeg|png|gif)(\.html)?$/i);
-    //   const isPdf = file.name.match(/\.pdf$/i);
-
-    //   // console.log(isImage, isPdf);
-
-    //   return {
-    //     id: URL.createObjectURL(file), // 고유한 URL 생성 (임시)
-    //     file,
-    //     previewUrl: URL.createObjectURL(file),
-    //     type: isImage ? "image" : isPdf ? "pdf" : "unknown",
-    //   };
-    // });
-
-    setFiles(selectedFiles);
+    setPreviewUrls(prevUrls => [...prevUrls, ...previews]);
   };
 
-  // 📌 파일 업로드
-  const handleUpload = async () => {
-    if (files.length === 0) return alert("파일을 선택해주세요.");
+  // 선택한 파일 삭제
+  const handleRemoveFile = (index) => {
+    setFiles(prevFiles => prevFiles.filter((_, i) => i !== index));
+    setPreviewUrls(prevUrls => prevUrls.filter((_, i) => i !== index));
+  };
+
+  // 파일 업로드
+  async function handleUpload () {
+    // if (files.length === 0) return alert("파일을 선택해주세요.");
 
     const formData = new FormData();
     formData.append("post_id", post_id);
@@ -78,19 +71,20 @@ function ModifyFile(props){
     console.log(result);
 
     if (response.ok) {
-      alert("업로드 성공!");
+      console.log("업로드 성공!");
       setFiles([]);
       setPreviewUrls([]);
-      setChangeFile((changeFile) => !changeFile);
+      // setChangeFile((changeFile) => !changeFile);
+      onUpload(); // 상태 끌어올리기
     } else {
       alert("업로드 실패!");
       console.log('업로드 실패 : ' + result.message);
     }
   };
 
-  // 📌 파일 삭제
+  // 파일 삭제
   const handleDelete = async (file_id, file_name) => {
-    const isConfirmed = window.confirm('헤당 글을 삭제하시겠습니까?');
+    const isConfirmed = window.confirm('헤당 파일을 삭제하시겠습니까?');
     if (!isConfirmed) return;
 
     const response = await fetch(`http://localhost:5000/deletefile/${file_id}`, {
@@ -111,42 +105,29 @@ function ModifyFile(props){
     <>
       <input type="file" multiple onChange={handleFileChange} />
 
-      {/* 📌 선택한 파일 미리보기 */}
       {previewUrls.length > 0 && (
         <div className="mt-4 grid grid-cols-3 gap-2">
-          {previewUrls.map((url, index) => (
+          {files.map((file, index) => (
             <div key={index}>
-              {files[index]?.type.startsWith("image/") ? (
-                <img src={url} alt="미리보기" className="w-20 h-20 object-cover" />
-              ) : files[index]?.type === "application/pdf" ? (
-                <embed src={url} type="application/pdf" width="50" height="50" />
-              ) : files[index]?.type.startsWith("text/html") ? (
-                <img src={url} alt="미리보기" className="w-20 h-20 object-cover" />
+              <p>{file.name}</p>
+              {file.type.startsWith("image/") ? (
+                <img src={previewUrls[index]} alt="미리보기" className={classes.img} />
+              ) : file.type === "application/pdf" ? (
+                <embed src={previewUrls[index]} type="application/pdf" className={classes.pdf} />
               ) : null}
+            <button 
+              className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 text-xs rounded"
+              onClick={() => handleRemoveFile(index)}
+            >
+            삭제
+          </button>
             </div>
           ))}
         </div>
       )}
-      {/* {files.length > 0 && (
-        <div className="mt-4 flex flex-wrap gap-2">
-          {files.map(({ id, previewUrl, file }) => (
-            <div key={id} className="w-24 h-24 flex items-center justify-center border rounded-md overflow-hidden">
-              {file.type.startsWith("image/") ? (
-                <img src={previewUrl} alt="미리보기" className="w-full h-full object-cover" />
-              ) : file.type === "application/pdf" ? (
-                <embed src={previewUrl} type="application/pdf" width="100%" height="100%" />
-              ) : file.type.startsWith("text/html") ? (
-                <img src={previewUrl} alt="미리보기" className="w-20 h-20 object-cover" />
-              ) : null}
-            </div>
-          ))}
-        </div>
-      )} */}
-
-
-      <button onClick={handleUpload} className="mt-4 p-2 bg-blue-500 text-white rounded">
+      {/* <button onClick={handleUpload} className="mt-4 p-2 bg-blue-500 text-white rounded">
         업로드
-      </button>
+      </button> */}
 
       <div className={classes.filebox}>
         {uploadedFiles.map((file) => (

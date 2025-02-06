@@ -1,14 +1,15 @@
 "use client"; // CSR
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
-import classes from './ModifyBoard.module.css';
 import ModifyFile from '../file/ModifyFile';
+import classes from './ModifyBoard.module.css';
 
 function ModifyBoard(props) {
   const modifyData = props.modifyData;
   
   const [content, setContent] = useState(modifyData.content);
+  const [completedSave, setCompletedSave] = useState(false); // DB 수정 완료
 
   const titleInputRef = useRef();
   const writerInputRef = useRef();
@@ -42,8 +43,7 @@ function ModifyBoard(props) {
 
       if (result.success) {
         console.log('글 수정 완료!');
-        router.push(`/${boardID}`);
-        // router.push(window.location.origin + `/${boardID}`);  // 절대 경로
+        setCompletedSave((completedSave) => !completedSave); // 수정완료여부 자식 컴포넌트에 전달
       } else {
         console.log('글 수정 실패 : ' + result.message);
       }
@@ -52,6 +52,27 @@ function ModifyBoard(props) {
     }
   };
 
+  // 파일 업로드까지 완료시 화면 이동
+  function handleRouting(){
+    router.push(`/${boardID}`);
+    // router.push(window.location.origin + `/${boardID}`);  // 절대 경로
+  }
+
+  // textarea 입력 초과시 높이 조절
+  function handleTextareaChange(e){
+    setContent(e.target.value);
+    resizeTextarea();
+  }
+
+  // textarea 높이 조절
+  const resizeTextarea = () => {
+    const textarea = contentInputRef.current;
+    if (textarea) {
+      textarea.style.height = "auto"; // 높이 초기화 후 다시 계산
+      textarea.style.height = textarea.scrollHeight + "px";
+    }
+  };
+  
   return (
     <>
       <form className={classes.form} onSubmit={submitHandler}>
@@ -70,7 +91,7 @@ function ModifyBoard(props) {
             rows='15'
             ref={contentInputRef}
             value={content}
-            onChange={(event) => setContent(event.target.value)}
+            onChange={handleTextareaChange}
             required
           >
           </textarea>
@@ -79,7 +100,7 @@ function ModifyBoard(props) {
           <button>Modify</button>
         </div>
       </form>
-      <ModifyFile postID={boardID} />
+      <ModifyFile postID={boardID} completedSave={completedSave} onUpload={handleRouting} />
     </>
   );
 }
