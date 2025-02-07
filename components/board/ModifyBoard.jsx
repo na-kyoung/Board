@@ -72,6 +72,11 @@ function ModifyBoard(props) {
       textarea.style.height = textarea.scrollHeight + "px";
     }
   };
+
+  // textarea 높이 조절
+  useEffect(() => {
+    resizeTextarea();
+  }, [content]);
   
   return (
     <>

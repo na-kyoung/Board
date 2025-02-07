@@ -123,7 +123,6 @@ function Board(props) {
         <button type='button' onClick={() => handleDelete()}>Delete</button>
       </div>
       </form>
-      {/* <FileUpload postID={boardID} /> */}
       <File postID={boardID} />
       <Comment postID={boardID} />
     </>

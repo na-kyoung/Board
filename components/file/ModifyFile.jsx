@@ -4,7 +4,7 @@ import classes from './ModifyFile.module.css';
 
 function ModifyFile({ onUpload, ...props}){
   const post_id = props.postID;
-  console.log('ModifyFile postid :', post_id);
+  // console.log('ModifyFile postid :', post_id);
 
   const [files, setFiles] = useState([]); // 업로드할 파일 목록
   const [previewUrls, setPreviewUrls] = useState([]); // 미리보기 url
@@ -23,9 +23,11 @@ function ModifyFile({ onUpload, ...props}){
 
 
   // 글 수정 완료 후 파일 업로드
-  if(props.completedSave){
-    handleUpload();
-  }
+  useEffect(() => {
+    if(props.completedSave){
+      handleUpload();
+    }
+  }, [props.completedSave]);
 
   // 선택한 파일 미리보기
   const handleFileChange = (event) => {
@@ -58,9 +60,9 @@ function ModifyFile({ onUpload, ...props}){
     formData.append("post_id", post_id);
     files.forEach((file) => formData.append("files", file));
     // console.log('formData:', formData);
-    for (let pair of formData.entries()) {
-      console.log('formData:', pair[0] + ": " + pair[1]);
-    }
+    // for (let pair of formData.entries()) {
+    //   console.log('formData:', pair[0] + ": " + pair[1]);
+    // }
 
     const response = await fetch("http://localhost:5000/uploadfiles", {
       method: "POST",
@@ -103,10 +105,10 @@ function ModifyFile({ onUpload, ...props}){
 
   return (
     <>
-      <input type="file" multiple onChange={handleFileChange} />
+      <input type="file" multiple onChange={handleFileChange} className={classes.input} />
 
       {previewUrls.length > 0 && (
-        <div className="mt-4 grid grid-cols-3 gap-2">
+        <div className={classes.uploadbox}>
           {files.map((file, index) => (
             <div key={index}>
               <p>{file.name}</p>
@@ -135,6 +137,7 @@ function ModifyFile({ onUpload, ...props}){
             {file.file_path.endsWith(".pdf") ? (
               <div className={classes.filecard}>
                 <embed src={file.file_path} type="application/pdf" className={classes.pdf} />
+                <p>{file.file_name}</p>
                 <button onClick={() => handleDelete(file.file_id, file.file_name)} className={classes.delbtn}>
                   삭제
                 </button>
@@ -142,6 +145,7 @@ function ModifyFile({ onUpload, ...props}){
             ) : (
               <div className={classes.filecard}>
                 <img src={file.file_path} alt={file.file_name} className={classes.img} />
+                <p>{file.file_name}</p>
                 <button onClick={() => handleDelete(file.file_id, file.file_name)} className={classes.delbtn}>
                   삭제
                 </button>

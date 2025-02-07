@@ -346,7 +346,7 @@ app.delete("/deletefile/:fileid", async (req, res) => {
   const { file_name } = req.body;
   const conn = await getConn();
   const filePath = path.join(uploadDir, file_name);
-  console.log('delete file ...', fileID);
+  // console.log('delete file ...', fileID);
 
   const query = "DELETE FROM file WHERE file_id = ?";
   

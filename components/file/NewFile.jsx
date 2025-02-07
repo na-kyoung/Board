@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import classes from './NewFile.module.css';
 
 function NewFile({ onUpload, ...props}){
@@ -9,9 +9,11 @@ function NewFile({ onUpload, ...props}){
   const [previewUrls, setPreviewUrls] = useState([]); // 미리보기 url
 
   // 글 수정 완료 후 파일 업로드
-  if(props.completedSave){
-    handleUpload();
-  }
+  useEffect(() => {
+    if(props.completedSave){
+      handleUpload();
+    }
+  }, [props.completedSave]);
 
   // 파일 선택 시 미리보기
   const handleFileChange = (event) => {
@@ -58,8 +60,8 @@ function NewFile({ onUpload, ...props}){
 
     if (response.ok) {
       console.log("업로드 성공!");
-      // setFiles([]);
-      // setPreviewUrls([]);
+      setFiles([]);
+      setPreviewUrls([]);
       onUpload(); // 상태 끌어올리기
     } else {
       alert("업로드 실패!");
@@ -69,11 +71,11 @@ function NewFile({ onUpload, ...props}){
 
   return (
     <>
-      <input type="file" multiple onChange={handleFileChange} />
+      <input type="file" multiple onChange={handleFileChange} className={classes.input} />
 
       {/* 선택한 파일 미리보기 */}
       {previewUrls.length > 0 && (
-        <div className="mt-4 grid grid-cols-3 gap-2">
+        <div className={classes.uploadbox}>
           {files.map((file, index) => (
             <div key={index}>
               <p>{file.name}</p>

@@ -25,9 +25,15 @@ function File(props) {
         {uploadedFiles.map((file) => (
           <div key={file.file_id} className={classes.files}>
             {file.file_path.endsWith(".pdf") ? (
-              <embed src={file.file_path} type="application/pdf" className={classes.pdf} />
+              <div className={classes.filecard}>
+                <embed src={file.file_path} type="application/pdf" className={classes.pdf} />
+                <p>{file.file_name}</p>
+              </div>
             ) : (
-              <img src={file.file_path} alt={file.file_name} className={classes.img} />
+              <div className={classes.filecard}>
+                <img src={file.file_path} alt={file.file_name} className={classes.img} />
+                <p>{file.file_name}</p>
+              </div>
             )}
           </div>
         ))}
