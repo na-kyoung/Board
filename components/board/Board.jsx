@@ -3,7 +3,7 @@
 import { useRouter } from 'next/router';
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import Comment from '../comment/MainComment';
+import MainComment from '../comment/MainComment';
 import File from '../file/File';
 import classes from './Board.module.css';
 
@@ -27,7 +27,7 @@ function Board(props) {
       const response = await fetch(`http://localhost:5000/board/${boardID}`);
       const resData = await response.json();
       // console.log(resData);
-      const data = await dateFormat(resData[0]);
+      const data = dateFormat(resData[0]);
       setBoardData(data);
       setContent(data.content);
     }
@@ -124,7 +124,7 @@ function Board(props) {
       </div>
       </form>
       <File postID={boardID} />
-      <Comment postID={boardID} />
+      <MainComment postID={boardID} />
     </>
   );
 }

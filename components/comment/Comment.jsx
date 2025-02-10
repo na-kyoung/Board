@@ -23,7 +23,7 @@ function Comment({ onChangeComment, ...props }){
 
   // 대댓글 생성시 상태 끌어올리기
   function handleNewReply(){
-    setShowReply((showReply) => !showReply); // 답글창 닫기
+    handleReplyClick(); // 답글창 닫기
     onChangeComment(); // 상태 끌어올리기
   }
 

@@ -19,7 +19,7 @@ function MainComment(props){
     async function fetchComment() {
     const response = await fetch(`http://localhost:5000/comment/${boardID}`);
     const resData = await response.json();
-    const data = await dateFormat(resData);
+    const data = dateFormat(resData);
     setCommentData(data);
     }
 

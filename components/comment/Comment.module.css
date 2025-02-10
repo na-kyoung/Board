@@ -37,20 +37,20 @@
 /* 댓글 수정창 */
 
 .modi_comment {
-    font-size: 10pt;
-    font-weight: 100;
-    margin-top: -25px;
+  font-size: 10pt;
+  font-weight: 100;
+  margin-top: -30px;
 }
 .modi_comment input {
-    font-size: 10pt;
-    font-weight: 100;
-    margin-top: 0.8rem;
+  font-size: 10pt;
+  font-weight: 100;
+  margin-top: 0.8rem;
 }
 
 .modi_user {
-    width: 100px;
-  }
+  width: 100px;
+}
   
 .modi_content {
-    width: 530px;
-  }
+  width: 530px;
+}
