@@ -17,22 +17,52 @@ function Board(props) {
   // 파라미터에서 id 가져오기
   const router  = useRouter();
   const boardID = router.query.boardID;
+  // console.log(router);
   // console.log(boardID);
 
   // 글 조회
+  // useEffect(() => {
+  //   console.log('Fetching Board Data...');
+
+  //   async function fetchBoard() {
+  //     const response = await fetch(`http://localhost:5000/board/${boardID}`);
+  //     const resData = await response.json();
+  //     // console.log(resData);
+  //     const data = dateFormat(resData[0]);
+  //     setBoardData(data);
+  //     setContent(data.content);
+  //   }
+
+  //   fetchBoard();
+  //   console.log('END');
+  // }, []);
+
   useEffect(() => {
     console.log('Fetching Board Data...');
 
-    async function fetchBoard() {
-      const response = await fetch(`http://localhost:5000/board/${boardID}`);
-      const resData = await response.json();
-      // console.log(resData);
-      const data = dateFormat(resData[0]);
-      setBoardData(data);
-      setContent(data.content);
+    function fetchBoard() {
+      fetch(`http://localhost:5000/board/${boardID}`)
+      .then((res) => {
+        console.log('fetch data :', res);
+        // console.log('fetch data :', data.json());
+        return res.json();
+      })
+      .catch((err) => {
+        console.log('fetch data Error :', err);
+      })
+      .then((res) => {
+        console.log('json data :', res);
+        const data = dateFormat(res[0]);
+        setBoardData(data);
+        setContent(data.content);
+      })
+      .catch((err) => {
+        console.log('json data Error :', err);
+      });
     }
 
     fetchBoard();
+    console.log('END');
   }, []);
 
   // 날짜 포맷 변경
@@ -62,7 +92,7 @@ function Board(props) {
 
       if (result.success) {
         alert('글 삭제 완료!');
-        router.push(`/`);
+        router.replace(`/`); // 이 화면으로 돌아오기 금지
       } else {
         alert(`글 삭제 실패 : ${result.message}`);
       }
@@ -91,6 +121,10 @@ function Board(props) {
   useEffect(() => {
     resizeTextarea();
   }, [content]);
+
+  // function handleClick(){
+  //   router.back();
+  // }
 
   return (
     <>
@@ -121,6 +155,7 @@ function Board(props) {
         </Link>
         </button>
         <button type='button' onClick={() => handleDelete()}>Delete</button>
+        {/* <button type='button' onClick={() => handleClick()}>Back</button> */}
       </div>
       </form>
       <File postID={boardID} />

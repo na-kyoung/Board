@@ -17,6 +17,7 @@ function ModifyBoard(props) {
 
   const router  = useRouter();
   const boardID = router.query.boardID;
+  console.log(router);
   // console.log(boardID);
 
   function submitHandler(event) {
@@ -54,7 +55,7 @@ function ModifyBoard(props) {
 
   // 파일 업로드까지 완료시 화면 이동
   function handleRouting(){
-    router.push(`/${boardID}`);
+    router.replace(`/${boardID}`);
     // router.push(window.location.origin + `/${boardID}`);  // 절대 경로
   }
 

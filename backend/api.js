@@ -67,25 +67,52 @@ app.get('/board', async (req, res) => {
 });
 
 // 게시글 단일 조회
-app.get('/board/:postid', async (req, res) => {
-  const postID = req.params.postid;
-  const conn = await getConn();
-  const query = 'SELECT * FROM POST where post_id = ?';
+// app.get('/board/:postid', async (req, res) => {
+//   const postID = req.params.postid;
+//   const conn = await getConn();
+//   const query = 'SELECT * FROM POST where post_id = ?';
 
-  try {
-    let [rows] = await conn.query(query, [postID]);
+//   try {
+//     let [rows] = await conn.query(query, [postID]);
+//     conn.release();
+//     console.log('Select Board Success!');
+//     res.send(rows);
+//   } catch (err) {
+//     console.log(`Select Board Error : ${err}`);
+//     conn.release();
+//     res.status(500).json({ error: "글 조회 실패", message: err.message });
+//   }
+// });
+app.get('/board/:postid', (req, res) => {
+  const postID = req.params.postid;
+  const query = 'SELECT * FROM POST where post_id = ?';
+  let conn;
+
+  getConn()
+  .then((connection) => {
+    conn = connection;
+    console.log('Connect DB Succes!');
+    return conn.query(query, [postID]);
+  })
+  .catch((err) => {
+    console.log('getConn Error :', err);
+    res.status(500).json({ error: "DB연결 실패", message: err.message });
+  })
+  .then(([rows]) => {
     conn.release();
     console.log('Select Board Success!');
     res.send(rows);
-  } catch (err) {
-    console.log(`Select Board Error : ${err}`);
+  })
+  .catch((err) => {
     conn.release();
+    console.log('Select Board Error :', err);
     res.status(500).json({ error: "글 조회 실패", message: err.message });
-  }
+  });
 });
 
 // 게시글 수정
 app.put('/modifyboard/:postid', async (req, res) => {
+  console.log('modifyboard');
   const postID = req.params.postid;
   const { title, user_id, content } = req.body;
   const conn = await getConn();

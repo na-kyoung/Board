@@ -51,7 +51,7 @@ function NewBoard(props) {
 
   // 파일 업로드까지 완료시 화면 이동
   function handleRouting(){
-    router.push(`/`); // 메인화면 이동
+    router.replace(`/`); // 메인화면 이동
     // router.push(window.location.origin + `/${boardID}`);  // 절대 경로
   }
 
